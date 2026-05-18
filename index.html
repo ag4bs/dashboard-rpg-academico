@@ -1,0 +1,2674 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Nerd Mode</title>
+    <!-- Fontes: Silkscreen para títulos de jogos, Fira Code para o estilo programação -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Silkscreen&display=swap"
+        rel="stylesheet">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        :root {
+            --bg-color: #050505;
+            --surface-color: #111111;
+            --border-color: #333;
+            --text-primary: #e0e0e0;
+            --text-secondary: #888;
+            --neon-blue: #00f3ff;
+            --neon-pink: #ff00ea;
+            --neon-green: #00ff66;
+            --neon-purple: #bd00ff;
+            --grid-color: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Fira Code', monospace;
+            background: radial-gradient(circle at top, #0d071a 0%, #030105 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Fundo de Grade (Grid Fina e Discreta) */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -2;
+            mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 1) 30%, rgba(0, 0, 0, 0) 90%);
+            -webkit-mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 1) 30%, rgba(0, 0, 0, 0) 90%);
+        }
+
+        /* Glow Ciano Suave e Atmosfera Cyber */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background:
+                radial-gradient(circle at 10% 20%, rgba(0, 243, 255, 0.04) 0%, transparent 45%),
+                radial-gradient(circle at 90% 80%, rgba(189, 0, 255, 0.03) 0%, transparent 45%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Efeito de TV CRT (Scanlines) sutil para dar um ar retrô */
+        body::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            z-index: 100;
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            margin-bottom: 3rem;
+            text-align: center;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        h1 {
+            font-family: 'Silkscreen', cursive;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            text-shadow: 3px 3px 0px var(--neon-purple), -3px -3px 0px var(--neon-blue);
+            letter-spacing: 2px;
+        }
+
+        .date {
+            font-size: 1.1rem;
+            color: var(--neon-green);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+            border-bottom: 1px dashed var(--neon-green);
+            padding-bottom: 5px;
+        }
+
+        /* Efeito do cursor piscando do terminal */
+        .cursor {
+            display: inline-block;
+            width: 12px;
+            height: 20px;
+            background-color: var(--neon-green);
+            vertical-align: text-bottom;
+            animation: blink 1s step-end infinite;
+            margin-left: 5px;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            animation: fadeInUp 1s ease-out 0.3s both;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background-color: rgba(17, 17, 17, 0.85);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            /* Cantos menos arredondados estilo retrô */
+            padding: 2.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+            outline: none;
+        }
+
+        .card:focus-visible {
+            outline: 2px solid var(--neon-blue);
+            outline-offset: 4px;
+        }
+
+        /* Efeitos de Hover Neon por Card */
+        .card:nth-child(1):hover {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2) inset, 0 0 15px rgba(0, 243, 255, 0.4);
+        }
+
+        .card:nth-child(2):hover {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 20px rgba(255, 0, 234, 0.2) inset, 0 0 15px rgba(255, 0, 234, 0.4);
+        }
+
+        .card:nth-child(3):hover {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.2) inset, 0 0 15px rgba(0, 255, 102, 0.4);
+        }
+
+        .card-icon {
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            /* Usando emojis nerd/temáticos */
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+        }
+
+        .card:hover .card-icon {
+            transform: scale(1.2) translateY(-10px);
+        }
+
+        .card-value {
+            font-family: 'Silkscreen', cursive;
+            font-size: 4rem;
+            margin-bottom: 0.5rem;
+            line-height: 1;
+        }
+
+        .card:nth-child(1) .card-value {
+            color: var(--neon-blue);
+        }
+
+        .card:nth-child(2) .card-value {
+            color: var(--neon-pink);
+        }
+
+        .card:nth-child(3) .card-value {
+            color: var(--neon-green);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-subtitle {
+            font-size: 0.85rem;
+            color: #777;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        /* Seção Hobbies (Música e Séries) */
+        .hobbies-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .hobby-pill {
+            background: rgba(17, 17, 17, 0.8);
+            border: 1px solid #333;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+            cursor: default;
+        }
+
+        .hobby-pill:hover {
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 15px rgba(189, 0, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .hobby-icon {
+            font-size: 1.8rem;
+        }
+
+        .hobby-info {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .hobby-label {
+            font-size: 0.7rem;
+            color: var(--neon-purple);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        .hobby-title {
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+
+        /* Animações */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+                text-shadow: 2px 2px 0px var(--neon-purple), -2px -2px 0px var(--neon-blue);
+            }
+
+            body {
+                padding: 1.5rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hobby-pill {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Estilos de Missões Avançadas */
+        .mission-group-title {
+            font-family: 'Silkscreen', cursive;
+            font-size: 1.1rem;
+            color: var(--neon-pink);
+            margin: 1.5rem 0 1rem 0;
+            text-transform: uppercase;
+            border-bottom: 1px dashed rgba(255, 0, 234, 0.3);
+            padding-bottom: 5px;
+        }
+
+        .mission-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid #222;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .mission-card:hover {
+            border-color: var(--neon-pink);
+        }
+
+        .mission-header {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .mission-header:hover {
+            background: rgba(255, 0, 234, 0.05);
+        }
+
+        .mission-info {
+            flex: 1;
+        }
+
+        .mission-title {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin-bottom: 6px;
+            transition: color 0.3s;
+        }
+
+        .mission-title a {
+            color: var(--neon-blue);
+            text-decoration: none;
+            font-size: 0.8rem;
+            margin-left: 8px;
+            border: 1px solid var(--neon-blue);
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .mission-title a:hover {
+            background: rgba(0, 243, 255, 0.2);
+        }
+
+        .mission-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .meta-badge {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.65rem;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .meta-badge.time {
+            color: var(--neon-purple);
+            border: 1px solid var(--neon-purple);
+            background: rgba(189, 0, 255, 0.1);
+        }
+
+        .meta-badge.priority.alta {
+            color: #fff;
+            border: 1px solid var(--neon-pink);
+            background: rgba(255, 0, 85, 0.2);
+        }
+
+        .meta-badge.category {
+            color: var(--neon-blue);
+            border: 1px solid var(--neon-blue);
+            background: rgba(0, 243, 255, 0.1);
+        }
+
+        .meta-badge.status {
+            color: #aaa;
+            border: 1px solid #555;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .meta-badge.expand {
+            color: var(--neon-green);
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .mission-subtasks {
+            background: rgba(0, 0, 0, 0.6);
+            border-top: 1px solid #222;
+            padding: 5px 15px 10px 45px;
+            display: none;
+        }
+
+        .subtask-row {
+            display: flex;
+            align-items: center;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+
+        .subtask-row:hover .subtask-title {
+            color: var(--neon-pink);
+        }
+
+        .subtask-title {
+            color: #ccc;
+            font-size: 0.85rem;
+            transition: color 0.3s;
+        }
+
+        .mission-card.completed {
+            opacity: 0.5;
+            border-color: var(--neon-green);
+        }
+
+        .mission-card.completed .mission-title {
+            text-decoration: line-through;
+            color: #555;
+        }
+
+        .mission-card.completed .meta-badge.status {
+            color: var(--neon-green);
+            border-color: var(--neon-green);
+            background: rgba(0, 255, 102, 0.1);
+        }
+
+        .subtask-row.completed .subtask-title {
+            text-decoration: line-through;
+            color: #555 !important;
+        }
+
+        .checkbox-ui {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--neon-pink);
+            border-radius: 4px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .checkbox-ui.sub {
+            width: 16px;
+            height: 16px;
+            border-width: 1px;
+            margin-right: 10px;
+            margin-top: 0;
+        }
+
+        .completed>.mission-header>.checkbox-ui,
+        .subtask-row.completed>.checkbox-ui {
+            border-color: var(--neon-green);
+            background: rgba(0, 255, 102, 0.2);
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.4);
+        }
+
+        .completed>.mission-header>.checkbox-ui .checkmark,
+        .subtask-row.completed>.checkbox-ui .checkmark {
+            display: block;
+        }
+
+        .checkmark {
+            display: none;
+            color: var(--neon-green);
+            font-weight: bold;
+            font-family: sans-serif;
+            font-size: 14px;
+        }
+
+        .checkbox-ui.sub .checkmark {
+            font-size: 11px;
+        }
+
+        /* Estilos Portais de Missão */
+        .portal-card {
+            background: rgba(17, 17, 17, 0.8) !important;
+            border: 1px solid #333 !important;
+            padding: 1.2rem !important;
+            border-radius: 8px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 15px !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            position: relative;
+            overflow: hidden;
+            outline: none;
+        }
+
+        .portal-card:hover {
+            border-color: var(--neon-blue) !important;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2) !important;
+            transform: translateY(-3px);
+        }
+
+        .portal-card:focus-visible {
+            outline: 2px solid var(--neon-blue);
+            outline-offset: 4px;
+        }
+
+        .portal-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(0, 243, 255, 0.05), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .portal-card:hover::after {
+            transform: translateX(100%);
+        }
+
+        /* Estilos Sistema de Leitura */
+        .library-item {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #222;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s;
+        }
+
+        .library-item:hover {
+            border-color: var(--neon-blue);
+            background: rgba(0, 243, 255, 0.05);
+        }
+
+        .library-item.completed {
+            border-color: var(--neon-green);
+            opacity: 0.8;
+        }
+
+        .library-btn {
+            background: transparent;
+            border: 1px solid #444;
+            color: #aaa;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            cursor: pointer;
+            font-family: 'Fira Code', monospace;
+            transition: all 0.2s;
+        }
+
+        .library-btn:hover {
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+        }
+
+        .library-btn.delete:hover {
+            border-color: var(--neon-pink);
+            color: var(--neon-pink);
+        }
+
+        .reading-form-input {
+            background: #000;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .reading-form-input:focus {
+            border-color: var(--neon-blue);
+        }
+
+        /* --- ESTILOS MISSÕES ACADÊMICAS EDITAIS E DRAG & DROP --- */
+        .mission-group-container {
+            min-height: 80px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px dashed rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .mission-group-container.drag-over {
+            border-color: var(--neon-pink);
+            background: rgba(255, 0, 234, 0.08);
+            box-shadow: 0 0 15px rgba(255, 0, 234, 0.2) inset;
+        }
+
+        .mission-card.dragging {
+            opacity: 0.4;
+            border: 2px dashed var(--neon-pink) !important;
+        }
+
+        .btn-action-edit {
+            background: transparent;
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Fira Code', monospace;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .btn-action-edit:hover {
+            background: rgba(0, 243, 255, 0.1);
+            box-shadow: 0 0 8px rgba(0, 243, 255, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-action-delete {
+            background: transparent;
+            border: 1px solid var(--neon-pink);
+            color: var(--neon-pink);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Fira Code', monospace;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .btn-action-delete:hover {
+            background: rgba(255, 0, 234, 0.1);
+            box-shadow: 0 0 8px rgba(255, 0, 234, 0.4);
+            transform: translateY(-1px);
+        }
+
+        /* Modal Retro/Neon */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(8px);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            background: rgba(17, 17, 17, 0.95);
+            border: 2px solid var(--neon-pink);
+            box-shadow: 0 0 30px rgba(255, 0, 234, 0.3), inset 0 0 15px rgba(255, 0, 234, 0.1);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Fira Code', monospace;
+            color: var(--text-primary);
+            animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-family: 'Silkscreen', cursive;
+            color: var(--neon-pink);
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(255, 0, 234, 0.5);
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: #888;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: var(--neon-pink);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            text-align: left;
+        }
+
+        .form-group label {
+            font-size: 0.75rem;
+            color: var(--neon-blue);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            background: #000;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 10px 12px;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus, 
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 10px rgba(255, 0, 234, 0.2);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn-subtask-add {
+            background: transparent;
+            border: 1px dashed var(--neon-green);
+            color: var(--neon-green);
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin-top: 5px;
+        }
+
+        .btn-subtask-add:hover {
+            background: rgba(0, 255, 102, 0.1);
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);
+        }
+
+        .modal-subtask-item {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+
+        .modal-subtask-item input[type="text"] {
+            flex: 1;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+        }
+
+        .modal-subtask-item select {
+            width: 120px;
+            padding: 6px;
+            font-size: 0.8rem;
+        }
+
+        .btn-subtask-del {
+            background: transparent;
+            border: 1px solid #ff0055;
+            color: #ff0055;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .btn-subtask-del:hover {
+            background: rgba(255, 0, 85, 0.1);
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #333;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid #555;
+            color: #aaa;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel:hover {
+            border-color: #777;
+            color: #fff;
+        }
+
+        .btn-save {
+            background: var(--neon-pink);
+            border: none;
+            color: #000;
+            padding: 10px 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Fira Code', monospace;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(255, 0, 234, 0.3);
+        }
+
+        .btn-save:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 25px rgba(255, 0, 234, 0.5);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>> Por onde começo hoje?</h1>
+            <div class="date"
+                style="text-align: left; display: inline-block; padding: 10px; background: rgba(0,255,102,0.05); border: 1px dashed var(--neon-green); border-radius: 8px;">
+                >_ Data: <span id="current-date">Carregando...</span><br>
+                >_ Log: <span id="system-log" style="color: var(--text-secondary);">Aguardando
+                    sincronização...</span><span class="cursor"></span>
+            </div>
+
+            <!-- Google Auth Container -->
+            <div id="auth-container" style="margin-top: 20px; display: flex; justify-content: center;">
+                <button id="google-login-btn" onclick="handleLogin()"
+                    style="background: #111; border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 10px 24px; border-radius: 4px; cursor: pointer; font-family: 'Fira Code', monospace; font-size: 0.9rem; transition: all 0.3s; display: flex; align-items: center; gap: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;"
+                    onmouseover="this.style.background='rgba(0, 243, 255, 0.1)'; this.style.boxShadow='0 0 15px rgba(0, 243, 255, 0.3)';"
+                    onmouseout="this.style.background='#111'; this.style.boxShadow='none';">
+                    <img src="https://www.google.com/favicon.ico" style="width: 18px; height: 18px;">
+                    Acessar com Google
+                </button>
+
+                <div id="user-profile"
+                    style="display: none; align-items: center; gap: 15px; background: rgba(17, 17, 17, 0.85); padding: 10px 20px; border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);">
+                    <img id="user-avatar" src="" alt="Avatar"
+                        style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--neon-blue);">
+                    <div style="text-align: left;">
+                        <div id="user-name"
+                            style="color: var(--neon-blue); font-weight: bold; font-family: 'Silkscreen', cursive; font-size: 1.1rem; letter-spacing: 1px;">
+                        </div>
+                        <div id="user-email" style="font-size: 0.8rem; color: #aaa;"></div>
+                    </div>
+                    <button id="sync-btn" onclick="tokenClient.requestAccessToken()"
+                        style="background: transparent; border: 1px solid var(--neon-green); color: var(--neon-green); padding: 8px 12px; border-radius: 4px; cursor: pointer; font-family: 'Fira Code', monospace; font-size: 0.8rem; margin-left: auto; transition: all 0.3s;"
+                        onmouseover="this.style.background='rgba(0, 255, 102, 0.1)'; this.style.boxShadow='0 0 10px rgba(0, 255, 102, 0.3)';"
+                        onmouseout="this.style.background='transparent'; this.style.boxShadow='none';">Sincronizar
+                        APIs</button>
+                    <button id="logout-btn" onclick="logout()"
+                        style="background: transparent; border: 1px solid var(--neon-pink); color: var(--neon-pink); padding: 8px 12px; border-radius: 4px; cursor: pointer; font-family: 'Fira Code', monospace; font-size: 0.8rem; margin-left: 10px; transition: all 0.3s;"
+                        onmouseover="this.style.background='rgba(255, 0, 234, 0.1)'; this.style.boxShadow='0 0 10px rgba(255, 0, 234, 0.3)';"
+                        onmouseout="this.style.background='transparent'; this.style.boxShadow='none';">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="dashboard-grid">
+            <!-- Livros / Emails -->
+            <div class="card" role="button" tabindex="0" 
+                onclick="window.open('https://mail.google.com/mail/u/0/#search/is%3Aunread', '_blank')"
+                onkeydown="if(event.key==='Enter') window.open('https://mail.google.com/mail/u/0/#search/is%3Aunread', '_blank')">
+                <div class="card-icon">📚</div>
+                <div class="card-value" id="card-emails">...</div>
+                <div class="card-title">Pergaminhos</div>
+                <div class="card-subtitle">(Emails não lidos)</div>
+            </div>
+
+            <!-- Jogos / Reuniões -->
+            <div class="card" role="button" tabindex="0"
+                onclick="openRaidLink()"
+                onkeydown="if(event.key==='Enter') openRaidLink()">
+                <div class="card-icon">📡</div>
+                <div class="card-value" id="card-calendar">...</div>
+                <div class="card-title">Raids do Dia</div>
+                <div class="card-subtitle">(Lives e aulas de hoje)</div>
+            </div>
+
+            <!-- RPG / Tarefas -->
+            <div class="card" role="button" tabindex="0"
+                onclick="document.querySelector('.agenda-wrapper').scrollIntoView({behavior: 'smooth'})"
+                onkeydown="if(event.key==='Enter') document.querySelector('.agenda-wrapper').scrollIntoView({behavior: 'smooth'})">
+                <div class="card-icon">⚔️</div>
+                <div class="card-value" id="card-tasks">...</div>
+                <div class="card-title">Quests do Dia</div>
+                <div class="card-subtitle">(Missões pendentes)</div>
+            </div>
+        </div>
+
+        <!-- Portais de Missão -->
+        <div class="portals-section" style="width: 100%; max-width: 800px; margin: 0 auto 2rem auto; animation: fadeInUp 1s ease-out 0.4s both;">
+            <h3 style="font-family: 'Silkscreen', cursive; font-size: 0.9rem; color: var(--neon-blue); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.2rem;">⚡</span> Portais de Missão
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                <!-- Faculdade -->
+                <div class="portal-card" role="button" tabindex="0" onclick="openPortal('fatecie')" onkeydown="if(event.key==='Enter') openPortal('fatecie')">
+                    <span style="font-size: 2.2rem; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));">🎓</span>
+                    <div style="text-align: left;">
+                        <div style="font-family: 'Silkscreen', cursive; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 2px;">Portal da Faculdade</div>
+                        <div style="font-size: 0.7rem; color: var(--text-secondary); font-family: 'Fira Code', monospace;">Acessar Fatecie / disciplinas</div>
+                    </div>
+                </div>
+                <!-- Curso -->
+                <div class="portal-card" role="button" tabindex="0" onclick="openPortal('thinkific')" onkeydown="if(event.key==='Enter') openPortal('thinkific')">
+                    <span style="font-size: 2.2rem; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));">🚀</span>
+                    <div style="text-align: left;">
+                        <div style="font-family: 'Silkscreen', cursive; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 2px;">Portal do Curso</div>
+                        <div style="font-size: 0.7rem; color: var(--text-secondary); font-family: 'Fira Code', monospace;">Acessar PrograMaria / Thinkific</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SISTEMA DE LEITURA (CONTROLE E BIBLIOTECA) -->
+        <div id="reading-system-section" style="width: 100%; max-width: 800px; margin: 0 auto 3rem auto; animation: fadeInUp 1s ease-out 0.42s both;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                <h3 style="font-family: 'Silkscreen', cursive; font-size: 0.9rem; color: var(--neon-blue); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.2rem;">📖</span> Controle de Leituras
+                </h3>
+                <button onclick="toggleReadingControl()" style="background: transparent; border: 1px solid #444; color: #888; padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; font-family: 'Fira Code', monospace;">[ Expandir / Recolher Painel ]</button>
+            </div>
+
+            <!-- Painel de Controle (Formulário) -->
+            <div id="reading-control-panel" style="background: rgba(17, 17, 17, 0.85); border: 2px solid #333; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; display: none; backdrop-filter: blur(5px);">
+                <input type="hidden" id="reading-id-input">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 1.5rem;">
+                    <div>
+                        <label style="font-size: 0.65rem; color: #888; text-transform: uppercase; display: block; margin-bottom: 5px;">Título</label>
+                        <input type="text" id="reading-title-input" class="reading-form-input" placeholder="Ex: O Hobbit">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.65rem; color: #888; text-transform: uppercase; display: block; margin-bottom: 5px;">Autor</label>
+                        <input type="text" id="reading-author-input" class="reading-form-input" placeholder="Ex: J.R.R. Tolkien">
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <div style="flex: 1;">
+                            <label style="font-size: 0.65rem; color: #888; text-transform: uppercase; display: block; margin-bottom: 5px;">Pág. Atual</label>
+                            <input type="number" id="reading-current-page-input" class="reading-form-input" value="0">
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="font-size: 0.65rem; color: #888; text-transform: uppercase; display: block; margin-bottom: 5px;">Total Pág.</label>
+                            <input type="number" id="reading-total-pages-input" class="reading-form-input" value="100">
+                        </div>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.65rem; color: #888; text-transform: uppercase; display: block; margin-bottom: 5px;">Tipo</label>
+                        <select id="reading-type-input" class="reading-form-input" style="height: 33px;">
+                            <option value="Livro">Livro</option>
+                            <option value="PDF">PDF</option>
+                            <option value="Artigo">Artigo</option>
+                            <option value="Apostila">Apostila</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.65rem; color: #888; text-transform: uppercase; display: block; margin-bottom: 5px;">Categoria</label>
+                        <select id="reading-category-input" class="reading-form-input" style="height: 33px;">
+                            <option value="Faculdade">Faculdade</option>
+                            <option value="Curso">Curso</option>
+                            <option value="Pessoal">Pessoal</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.65rem; color: #888; text-transform: uppercase; display: block; margin-bottom: 5px;">Link (Opcional)</label>
+                        <input type="text" id="reading-link-input" class="reading-form-input" placeholder="https://...">
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap;">
+                    <button onclick="clearReadingForm()" style="background: transparent; border: 1px solid #555; color: #aaa; padding: 8px 15px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.8rem; cursor: pointer;">LIMPAR</button>
+                    <button onclick="saveReading()" style="background: var(--neon-blue); border: none; color: #000; padding: 8px 20px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.8rem; cursor: pointer; font-weight: bold;">SALVAR LEITURA</button>
+                </div>
+            </div>
+
+            <!-- Biblioteca de Missões (Lista) -->
+            <div id="reading-library-panel" style="background: rgba(10, 10, 10, 0.5); border: 1px solid #222; border-radius: 8px; padding: 1rem;">
+                <h4 style="font-family: 'Silkscreen', cursive; font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; border-bottom: 1px solid #222; padding-bottom: 5px;">
+                    BIBLIOTECA DE MISSÕES
+                </h4>
+                <div id="reading-list-container">
+                    <!-- Gerado via JS -->
+                    <div style="text-align: center; color: #555; padding: 20px; font-size: 0.8rem; font-style: italic;">Nenhuma leitura cadastrada na biblioteca.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuração de Portais -->
+        <div id="portal-config-wrapper" 
+            style="width: 100%; max-width: 800px; margin: 0 auto 2rem auto; background: rgba(17, 17, 17, 0.6); border: 1px solid #333; border-radius: 8px; padding: 1.2rem; animation: fadeInUp 1s ease-out 0.45s both; backdrop-filter: blur(5px);">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 1rem;">
+                <span style="font-size: 1.2rem;">🛠️</span>
+                <span style="color: var(--neon-blue); font-family: 'Silkscreen', cursive; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">Config Portais:</span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label style="font-size: 0.65rem; color: #888; text-transform: uppercase;">Link Faculdade:</label>
+                    <input type="text" id="portal-fatecie-input" placeholder="URL da Faculdade..." 
+                        style="background: #000; border: 1px solid #444; color: #fff; padding: 8px 12px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.8rem; outline: none;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label style="font-size: 0.65rem; color: #888; text-transform: uppercase;">Link Curso:</label>
+                    <input type="text" id="portal-thinkific-input" placeholder="URL do Curso..." 
+                        style="background: #000; border: 1px solid #444; color: #fff; padding: 8px 12px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.8rem; outline: none;">
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 1rem;">
+                <button onclick="savePortalLinks()" 
+                    style="background: var(--neon-blue); border: none; color: #000; padding: 8px 20px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.75rem; cursor: pointer; font-weight: bold;">SALVAR LINKS</button>
+                <button onclick="resetPortalLinks()" 
+                    style="background: transparent; border: 1px solid #ff0055; color: #ff0055; padding: 8px 20px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.75rem; cursor: pointer;">RESETAR</button>
+            </div>
+        </div>
+
+        <!-- Configuração de Raid -->
+        <div id="raid-config-wrapper" 
+            style="width: 100%; max-width: 800px; margin: -1.5rem auto 2rem auto; background: rgba(17, 17, 17, 0.6); border: 1px solid #333; border-radius: 8px; padding: 1rem; display: flex; align-items: center; gap: 15px; flex-wrap: wrap; animation: fadeInUp 1s ease-out 0.35s both; backdrop-filter: blur(5px);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.2rem;">⚙️</span>
+                <span style="color: var(--neon-pink); font-family: 'Silkscreen', cursive; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">Config Raid:</span>
+            </div>
+            <input type="text" id="raid-link-input" placeholder="Cole o link da live (ex: YouTube, Meet)..." 
+                style="flex: 1; min-width: 250px; background: #000; border: 1px solid #444; color: #fff; padding: 8px 12px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.8rem; outline: none; transition: border-color 0.3s;"
+                onfocus="this.style.borderColor='var(--neon-pink)'"
+                onblur="this.style.borderColor='#444'">
+            <div style="display: flex; gap: 10px;">
+                <button onclick="saveLiveLink()" 
+                    style="background: var(--neon-pink); border: none; color: #000; padding: 8px 15px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.75rem; cursor: pointer; font-weight: bold; transition: transform 0.2s;"
+                    onmouseover="this.style.transform='scale(1.05)'"
+                    onmouseout="this.style.transform='scale(1)'">SALVAR LIVE</button>
+                <button onclick="resetLiveLink()" 
+                    style="background: transparent; border: 1px solid #ff0055; color: #ff0055; padding: 8px 15px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.75rem; cursor: pointer; transition: all 0.3s;"
+                    onmouseover="this.style.background='rgba(255, 0, 234, 0.1)'"
+                    onmouseout="this.style.background='transparent'">RESETAR</button>
+            </div>
+        </div>
+
+        <!-- Gráfico de Progresso -->
+        <div class="chart-wrapper"
+            style="width: 100%; max-width: 800px; margin: 0 auto 3rem auto; background: rgba(17, 17, 17, 0.85); border: 2px solid #333; border-radius: 8px; padding: 1.5rem; backdrop-filter: blur(5px); animation: fadeInUp 1s ease-out 0.4s both; transition: all 0.3s ease;"
+            onmouseover="this.style.borderColor='var(--neon-blue)'; this.style.boxShadow='0 0 15px rgba(0, 243, 255, 0.2) inset, 0 0 10px rgba(0, 243, 255, 0.3)';"
+            onmouseout="this.style.borderColor='#333'; this.style.boxShadow='none';">
+            <h3
+                style="font-family: 'Silkscreen', cursive; font-size: 1.2rem; color: var(--neon-blue); margin-bottom: 1rem; text-align: center; text-transform: uppercase;">
+                PROGRESSO DA SEMANA</h3>
+            <div style="position: relative; height: 250px; width: 100%;">
+                <canvas id="progressChart"></canvas>
+            </div>
+        </div>
+
+        <!-- XP Acadêmico -->
+        <div class="xp-wrapper"
+            style="width: 100%; max-width: 800px; margin: 0 auto 3rem auto; background: rgba(17, 17, 17, 0.85); border: 2px solid #333; border-radius: 8px; padding: 1.5rem; backdrop-filter: blur(5px); animation: fadeInUp 1s ease-out 0.45s both; transition: all 0.3s ease;"
+            onmouseover="this.style.borderColor='var(--neon-green)'; this.style.boxShadow='0 0 15px rgba(0, 255, 102, 0.2) inset, 0 0 10px rgba(0, 255, 102, 0.3)';"
+            onmouseout="this.style.borderColor='#333'; this.style.boxShadow='none';">
+            <h3
+                style="font-family: 'Silkscreen', cursive; font-size: 1.2rem; color: var(--neon-green); margin-bottom: 1rem; text-align: center; text-transform: uppercase;">
+                XP ACADÊMICO
+            </h3>
+
+            <div
+                style="display: flex; justify-content: space-between; margin-bottom: 8px; font-family: 'Fira Code', monospace; font-size: 0.9rem; color: #fff;">
+                <span style="font-weight: bold; color: var(--neon-green);">Nível <span id="xp-level">1</span> <span
+                        style="font-size: 0.7rem; color: #777;" id="xp-title">(Calouro)</span></span>
+                <span style="color: #aaa;"><span id="xp-percent">0</span>% para o próximo nível</span>
+            </div>
+
+            <div
+                style="width: 100%; height: 20px; background: #111; border-radius: 10px; overflow: hidden; border: 1px solid #333; position: relative;">
+                <div id="xp-bar-fill"
+                    style="width: 0%; height: 100%; background: linear-gradient(90deg, #00441b, var(--neon-green)); box-shadow: 0 0 10px var(--neon-green); border-radius: 10px 0 0 10px; transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);">
+                </div>
+            </div>
+        </div>
+
+        <!-- Missões Acadêmicas -->
+        <div class="agenda-wrapper" id="missions-section-wrapper"
+            style="width: 100%; max-width: 800px; margin: 0 auto 3rem auto; background: rgba(17, 17, 17, 0.85); border: 2px solid #333; border-radius: 8px; padding: 1.5rem; backdrop-filter: blur(5px); animation: fadeInUp 1s ease-out 0.5s both; transition: all 0.3s ease;"
+            onmouseover="this.style.borderColor='var(--neon-pink)'; this.style.boxShadow='0 0 15px rgba(255, 0, 234, 0.2) inset, 0 0 10px rgba(255, 0, 234, 0.3)';"
+            onmouseout="this.style.borderColor='#333'; this.style.boxShadow='none';">
+            <h3 style="font-family: 'Silkscreen', cursive; font-size: 1.2rem; color: var(--neon-pink); margin-bottom: 1rem; text-align: center; text-transform: uppercase;">
+                MISSÕES ACADÊMICAS
+            </h3>
+
+            <!-- Botão de Nova Missão -->
+            <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+                <button onclick="openNewMissionModal()" 
+                    style="background: transparent; border: 2px solid var(--neon-pink); color: var(--neon-pink); padding: 8px 20px; border-radius: 4px; font-family: 'Silkscreen', cursive; font-size: 0.9rem; cursor: pointer; font-weight: bold; transition: all 0.3s; box-shadow: 0 0 10px rgba(255, 0, 234, 0.2); text-transform: uppercase; letter-spacing: 1px;"
+                    onmouseover="this.style.background='rgba(255, 0, 234, 0.1)'; this.style.boxShadow='0 0 20px rgba(255, 0, 234, 0.5)';"
+                    onmouseout="this.style.background='transparent'; this.style.boxShadow='0 0 10px rgba(255, 0, 234, 0.2)';">
+                    + Nova Missão
+                </button>
+            </div>
+
+            <!-- MISSÕES DE HOJE -->
+            <div class="mission-group-wrapper">
+                <div class="mission-group-title" style="margin-top: 0.5rem;">MISSÕES DE HOJE</div>
+                <div class="mission-group-container" id="group-hoje" 
+                     ondragover="handleDragOver(event)" 
+                     ondragenter="handleDragEnter(event)" 
+                     ondragleave="handleDragLeave(event)" 
+                     ondrop="handleDrop(event, 'hoje')">
+                    <!-- Dynamic Today's Missions -->
+                </div>
+            </div>
+
+            <!-- MISSÕES DA SEMANA -->
+            <div class="mission-group-wrapper">
+                <div class="mission-group-title">MISSÕES DA SEMANA</div>
+                <div class="mission-group-container" id="group-semana" 
+                     ondragover="handleDragOver(event)" 
+                     ondragenter="handleDragEnter(event)" 
+                     ondragleave="handleDragLeave(event)" 
+                     ondrop="handleDrop(event, 'semana')">
+                    <!-- Dynamic Weekly Missions -->
+                </div>
+            </div>
+
+            <!-- MISSÕES ATRASADAS -->
+            <div class="mission-group-wrapper">
+                <div class="mission-group-title" style="color: var(--neon-pink); border-bottom-color: rgba(255, 0, 85, 0.3);">MISSÕES ATRASADAS</div>
+                <div class="mission-group-container" id="group-atrasadas" 
+                     ondragover="handleDragOver(event)" 
+                     ondragenter="handleDragEnter(event)" 
+                     ondragleave="handleDragLeave(event)" 
+                     ondrop="handleDrop(event, 'atrasadas')">
+                    <!-- Dynamic Overdue Missions -->
+                </div>
+            </div>
+
+            <!-- MISSÕES CONCLUÍDAS -->
+            <div class="mission-group-wrapper">
+                <div class="mission-group-title" style="color: var(--neon-green); border-bottom-color: rgba(0, 255, 102, 0.3);">MISSÕES CONCLUÍDAS</div>
+                <div class="mission-group-container" id="group-concluidas" 
+                     ondragover="handleDragOver(event)" 
+                     ondragenter="handleDragEnter(event)" 
+                     ondragleave="handleDragLeave(event)" 
+                     ondrop="handleDrop(event, 'concluidas')">
+                    <!-- Dynamic Completed Missions -->
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: center; margin-top: 1.5rem; gap: 15px;">
+                <button onclick="resetProgress()"
+                    style="background: transparent; border: 1px solid #ff0055; color: #ff0055; padding: 6px 15px; border-radius: 4px; font-family: 'Fira Code', monospace; cursor: pointer; font-size: 0.8rem; transition: all 0.3s ease; text-transform: uppercase;"
+                    onmouseover="this.style.background='rgba(255, 0, 85, 0.1)'; this.style.boxShadow='0 0 10px rgba(255, 0, 85, 0.3)';"
+                    onmouseout="this.style.background='transparent'; this.style.boxShadow='none';">
+                    Resetar Progresso
+                </button>
+                <button onclick="restoreDefaultMissionsPrompt()"
+                    style="background: transparent; border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 6px 15px; border-radius: 4px; font-family: 'Fira Code', monospace; cursor: pointer; font-size: 0.8rem; transition: all 0.3s ease; text-transform: uppercase;"
+                    onmouseover="this.style.background='rgba(0, 243, 255, 0.1)'; this.style.boxShadow='0 0 10px rgba(0, 243, 255, 0.3)';"
+                    onmouseout="this.style.background='transparent'; this.style.boxShadow='none';">
+                    Restaurar Missões Padrão
+                </button>
+            </div>
+        </div>
+
+        <!-- Custom Confirm Modal -->
+        <div id="confirm-modal" class="modal-overlay" style="display: none; z-index: 1100;">
+            <div class="modal-content" style="max-width: 400px; border-color: var(--neon-pink); box-shadow: 0 0 25px rgba(255, 0, 85, 0.4);">
+                <div class="modal-body" style="padding: 2rem 1.5rem; text-align: center;">
+                    <span style="font-size: 3rem; margin-bottom: 1rem; display: block; filter: drop-shadow(0 0 10px var(--neon-pink));">⚠️</span>
+                    <p id="confirm-message" style="font-family: 'Fira Code', monospace; font-size: 0.95rem; line-height: 1.5; color: #fff; margin-bottom: 2rem;">Tem certeza que deseja abandonar esta missão?</p>
+                    <div style="display: flex; justify-content: center; gap: 15px;">
+                        <button class="btn-cancel" onclick="closeConfirmModal()">CANCELAR</button>
+                        <button class="btn-save" id="confirm-yes-btn" style="background: var(--neon-pink); box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);">ABANDONAR</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Missão -->
+        <div id="mission-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title">> NOVA MISSÃO</h3>
+                    <button class="close-btn" onclick="closeMissionModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="modal-mission-id">
+                    
+                    <div class="form-group">
+                        <label for="mission-input-title">TÍTULO</label>
+                        <input type="text" id="mission-input-title" placeholder="Ex: Assistir videoaula de Programação">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mission-input-description">TEXTO DA MISSÃO / DESCRIÇÃO</label>
+                        <textarea id="mission-input-description" placeholder="Ex: Detalhes importantes sobre o conteúdo ou entregas da atividade..." rows="2"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="mission-input-category">CATEGORIA</label>
+                            <select id="mission-input-category">
+                                <option value="faculdade">Faculdade</option>
+                                <option value="python">Python</option>
+                                <option value="leituras">Leituras</option>
+                                <option value="tarefas">Tarefas</option>
+                                <option value="lives">Lives</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="mission-input-priority">PRIORIDADE</label>
+                            <select id="mission-input-priority">
+                                <option value="alta">Alta</option>
+                                <option value="média">Média</option>
+                                <option value="baixa">Baixa</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="mission-input-deadline">PRAZO</label>
+                            <input type="date" id="mission-input-deadline">
+                        </div>
+                        <div class="form-group">
+                            <label for="mission-input-status">STATUS INICIAL</label>
+                            <select id="mission-input-status">
+                                <option value="Pendente">Pendente</option>
+                                <option value="Em andamento">Em andamento</option>
+                                <option value="Concluída">Concluída</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mission-input-tags">TAGS (separadas por vírgula)</label>
+                        <input type="text" id="mission-input-tags" placeholder="Ex: ead, prova, urgente">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mission-input-link">LINK RELACIONADO (Opcional)</label>
+                        <input type="url" id="mission-input-link" placeholder="Ex: https://...">
+                    </div>
+
+                    <!-- Subtarefas Section -->
+                    <div class="form-group">
+                        <label>SUBTAREFAS (Métricas e Checklist)</label>
+                        <div id="modal-subtasks-container" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;">
+                            <!-- Dynamic Subtasks -->
+                        </div>
+                        <button type="button" class="btn-subtask-add" onclick="addModalSubtask()">+ Adicionar Subtarefa</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-cancel" onclick="closeMissionModal()">CANCELAR</button>
+                    <button class="btn-save" onclick="saveMissionFromModal()">SALVAR MISSÃO</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção Música e Séries -->
+        <div class="hobbies-section">
+            <div style="min-width: 300px; flex: 1; max-width: 400px; display: flex; align-items: center;">
+                <iframe
+                    style="border-radius: 12px; border: 1px solid #333; box-shadow: 0 0 15px rgba(189, 0, 255, 0.1);"
+                    src="https://open.spotify.com/embed/playlist/1Eo8xLS38u3P8U6706sT8d?utm_source=generator&theme=0"
+                    width="100%" height="80" frameBorder="0" allowfullscreen=""
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                    loading="lazy"></iframe>
+            </div>
+
+            <div class="hobby-pill" id="main-reading-card"
+                style="min-width: 300px; flex: 1; max-width: 400px; border-radius: 12px; padding: 0.8rem 1.5rem; justify-content: flex-start; min-height: 80px; box-sizing: border-box; background: rgba(0, 0, 0, 0.4); border: 1px solid #333; transition: all 0.3s ease; cursor: pointer;"
+                onclick="toggleReadingControl(true)"
+                onmouseover="this.style.borderColor='var(--neon-blue)'; this.style.boxShadow='0 0 10px rgba(0, 243, 255, 0.2)';"
+                onmouseout="this.style.borderColor='#333'; this.style.boxShadow='none';">
+                <div class="hobby-icon" style="font-size: 1.8rem; margin-right: 15px;">📖</div>
+                <div class="hobby-info" style="overflow: hidden; width: 100%;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <span class="hobby-label"
+                            style="color: var(--neon-blue); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;">Leitura
+                            Atual</span>
+                        <span id="current-reading-status"
+                            style="font-size: 0.6rem; background: rgba(0, 243, 255, 0.1); color: var(--neon-blue); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--neon-blue); font-family: 'Fira Code', monospace;">Em
+                            andamento</span>
+                    </div>
+
+                    <span class="hobby-title" id="current-reading-title"
+                        style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; font-size: 0.95rem; font-weight: bold; color: var(--text-primary);">Nenhuma leitura ativa</span>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                        <span id="current-reading-author"
+                            style="font-size: 0.75rem; color: #888; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%;">---</span>
+                        <div style="text-align: right;">
+                            <span id="current-reading-progress"
+                                style="font-size: 0.75rem; color: #aaa; font-family: 'Fira Code', monospace; font-weight: bold;">Pág. 0/0</span>
+                            <div id="current-reading-percent" style="font-size: 0.6rem; color: var(--neon-blue); font-family: 'Fira Code', monospace;">0%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // --- Google Auth Logic (Google Identity Services Modern) ---
+        let tokenClient;
+        let accessToken = localStorage.getItem('google_access_token');
+
+        function handleLogin() {
+            try {
+                tokenClient.requestAccessToken();
+            } catch (err) {
+                console.error("Erro ao iniciar login:", err);
+            }
+        }
+
+        function logout() {
+            const token = localStorage.getItem('google_access_token');
+            if (token) {
+                google.accounts.oauth2.revoke(token, () => {
+                    console.log('Token revogado com sucesso.');
+                });
+            }
+            localStorage.removeItem('userProfile');
+            localStorage.removeItem('google_access_token');
+            localStorage.removeItem('google_expires_at');
+            window.location.reload();
+        }
+
+        function updateUI() {
+            const profile = JSON.parse(localStorage.getItem('userProfile') || 'null');
+            const loginBtn = document.getElementById('google-login-btn');
+            const userProfileContainer = document.getElementById('user-profile');
+
+            if (accessToken) {
+                if (loginBtn) loginBtn.style.display = 'none';
+                if (userProfileContainer) {
+                    userProfileContainer.style.display = 'flex';
+                    // Se tivermos dados de perfil salvos, mostramos, senão mostramos status genérico
+                    document.getElementById('user-name').textContent = profile ? profile.name : "Conectado";
+                    document.getElementById('user-email').textContent = profile ? profile.email : "API Ativa";
+                    if (profile && profile.picture) {
+                        document.getElementById('user-avatar').src = profile.picture;
+                    } else {
+                        // Avatar padrão (ícone de rede)
+                        document.getElementById('user-avatar').src = "https://www.google.com/favicon.ico";
+                    }
+                }
+            } else {
+                if (loginBtn) loginBtn.style.display = 'flex';
+                if (userProfileContainer) userProfileContainer.style.display = 'none';
+            }
+        }
+
+        function checkLoginState() {
+            accessToken = localStorage.getItem('google_access_token');
+            const expiresAt = localStorage.getItem('google_expires_at');
+
+            // Verifica se o token existe e ainda é válido
+            if (accessToken && expiresAt && Date.now() < parseInt(expiresAt)) {
+                updateUI();
+                return true;
+            } else {
+                // Token expirado ou inexistente
+                accessToken = null;
+                localStorage.removeItem('google_access_token');
+                localStorage.removeItem('google_expires_at');
+                updateUI();
+                return false;
+            }
+        }
+
+        // --- Raid Link Logic ---
+        function openRaidLink() {
+            const link = localStorage.getItem('raid_live_link');
+            if (link && link.trim() !== "") {
+                window.open(link, '_blank');
+            } else {
+                alert("📡 Nenhuma live cadastrada no momento.");
+            }
+        }
+
+        function saveLiveLink() {
+            const input = document.getElementById('raid-link-input');
+            const url = input.value.trim();
+            if (url) {
+                localStorage.setItem('raid_live_link', url);
+                alert("✅ Link da live salvo! O card 'Raids do Dia' agora abrirá este endereço.");
+            } else {
+                alert("⚠️ Por favor, insira um link antes de salvar.");
+            }
+        }
+
+        function resetLiveLink() {
+            if (confirm("Deseja apagar o link da live cadastrada?")) {
+                localStorage.removeItem('raid_live_link');
+                document.getElementById('raid-link-input').value = "";
+                alert("🗑️ Link removido.");
+            }
+        }
+
+        function initRaidLink() {
+            const defaultLink = 'https://www.youtube.com/live/m1VRpXnPRKw?si=wTi3OJisnXTdDN2d';
+            if (!localStorage.getItem('raid_live_link')) {
+                localStorage.setItem('raid_live_link', defaultLink);
+            }
+            const currentLink = localStorage.getItem('raid_live_link');
+            const input = document.getElementById('raid-link-input');
+            if (input && currentLink) {
+                input.value = currentLink;
+            }
+        }
+
+        // --- Portal Links Logic ---
+        function openPortal(type) {
+            const link = localStorage.getItem('portal_' + type + '_link');
+            if (link && link.trim() !== "") {
+                window.open(link, '_blank');
+            } else {
+                alert("⚠️ Link ainda não cadastrado para este portal.");
+            }
+        }
+
+        function savePortalLinks() {
+            const fatecieUrl = document.getElementById('portal-fatecie-input').value.trim();
+            const thinkificUrl = document.getElementById('portal-thinkific-input').value.trim();
+            
+            localStorage.setItem('portal_fatecie_link', fatecieUrl);
+            localStorage.setItem('portal_thinkific_link', thinkificUrl);
+            
+            alert("✅ Portais sincronizados com sucesso!");
+        }
+
+        function resetPortalLinks() {
+            if (confirm("Deseja restaurar os links originais dos portais?")) {
+                const defaults = {
+                    fatecie: 'https://portaldoaluno.fatecie.edu.br/login',
+                    thinkific: 'https://euprogramo.thinkific.com/enrollments'
+                };
+                
+                localStorage.setItem('portal_fatecie_link', defaults.fatecie);
+                localStorage.setItem('portal_thinkific_link', defaults.thinkific);
+                
+                document.getElementById('portal-fatecie-input').value = defaults.fatecie;
+                document.getElementById('portal-thinkific-input').value = defaults.thinkific;
+                
+                alert("🗑️ Links restaurados.");
+            }
+        }
+
+        function initPortals() {
+            const defaults = {
+                fatecie: 'https://portaldoaluno.fatecie.edu.br/login',
+                thinkific: 'https://euprogramo.thinkific.com/enrollments'
+            };
+            
+            if (!localStorage.getItem('portal_fatecie_link')) localStorage.setItem('portal_fatecie_link', defaults.fatecie);
+            if (!localStorage.getItem('portal_thinkific_link')) localStorage.setItem('portal_thinkific_link', defaults.thinkific);
+            
+            document.getElementById('portal-fatecie-input').value = localStorage.getItem('portal_fatecie_link');
+            document.getElementById('portal-thinkific-input').value = localStorage.getItem('portal_thinkific_link');
+        }
+
+        // --- Reading System Logic ---
+        let readings = JSON.parse(localStorage.getItem('reading_list') || '[]');
+        let currentReadingId = localStorage.getItem('current_reading_id') || null;
+
+        function toggleReadingControl(show) {
+            const panel = document.getElementById('reading-control-panel');
+            if (show === true) panel.style.display = 'block';
+            else if (show === false) panel.style.display = 'none';
+            else panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function saveReading() {
+            const id = document.getElementById('reading-id-input').value || Date.now().toString();
+            const reading = {
+                id: id,
+                title: document.getElementById('reading-title-input').value.trim() || "Sem título",
+                author: document.getElementById('reading-author-input').value.trim() || "Autor desconhecido",
+                currentPage: parseInt(document.getElementById('reading-current-page-input').value) || 0,
+                totalPages: parseInt(document.getElementById('reading-total-pages-input').value) || 1,
+                type: document.getElementById('reading-type-input').value,
+                category: document.getElementById('reading-category-input').value,
+                link: document.getElementById('reading-link-input').value.trim(),
+                status: 'Em andamento',
+                completed: false
+            };
+
+            const index = readings.findIndex(r => r.id === id);
+            if (index > -1) readings[index] = { ...readings[index], ...reading };
+            else readings.push(reading);
+
+            localStorage.setItem('reading_list', JSON.stringify(readings));
+            if (!currentReadingId) setCurrentReading(reading.id);
+            
+            renderLibrary();
+            renderCurrentReading();
+            clearReadingForm();
+            alert("📚 Leitura salva na biblioteca!");
+        }
+
+        function clearReadingForm() {
+            document.getElementById('reading-id-input').value = "";
+            document.getElementById('reading-title-input').value = "";
+            document.getElementById('reading-author-input').value = "";
+            document.getElementById('reading-current-page-input').value = 0;
+            document.getElementById('reading-total-pages-input').value = 100;
+            document.getElementById('reading-link-input').value = "";
+        }
+
+        function editReading(id) {
+            const reading = readings.find(r => r.id === id);
+            if (!reading) return;
+
+            document.getElementById('reading-id-input').value = reading.id;
+            document.getElementById('reading-title-input').value = reading.title;
+            document.getElementById('reading-author-input').value = reading.author;
+            document.getElementById('reading-current-page-input').value = reading.currentPage;
+            document.getElementById('reading-total-pages-input').value = reading.totalPages;
+            document.getElementById('reading-type-input').value = reading.type;
+            document.getElementById('reading-category-input').value = reading.category;
+            document.getElementById('reading-link-input').value = reading.link || "";
+            
+            toggleReadingControl(true);
+            window.scrollTo({ top: document.getElementById('reading-system-section').offsetTop - 100, behavior: 'smooth' });
+        }
+
+        function deleteReading(id) {
+            if (!confirm("Remover esta leitura da biblioteca?")) return;
+            readings = readings.filter(r => r.id !== id);
+            if (currentReadingId === id) currentReadingId = null;
+            
+            localStorage.setItem('reading_list', JSON.stringify(readings));
+            localStorage.setItem('current_reading_id', currentReadingId);
+            
+            renderLibrary();
+            renderCurrentReading();
+            updateDynamicStats();
+        }
+
+        function setCurrentReading(id) {
+            currentReadingId = id;
+            localStorage.setItem('current_reading_id', id);
+            renderLibrary();
+            renderCurrentReading();
+        }
+
+        function toggleReadingCompletion(id) {
+            const index = readings.findIndex(r => r.id === id);
+            if (index === -1) return;
+
+            readings[index].completed = !readings[index].completed;
+            readings[index].status = readings[index].completed ? 'Concluído' : 'Em andamento';
+            
+            if (readings[index].completed) {
+                readings[index].currentPage = readings[index].totalPages;
+            }
+
+            localStorage.setItem('reading_list', JSON.stringify(readings));
+            renderLibrary();
+            renderCurrentReading();
+            updateDynamicStats();
+        }
+
+        function renderLibrary() {
+            const container = document.getElementById('reading-list-container');
+            if (readings.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #555; padding: 20px; font-size: 0.8rem; font-style: italic;">Nenhuma leitura cadastrada na biblioteca.</div>';
+                return;
+            }
+
+            container.innerHTML = readings.map(r => `
+                <div class="library-item ${r.completed ? 'completed' : ''}" style="border-left: 3px solid ${currentReadingId === r.id ? 'var(--neon-blue)' : '#333'}">
+                    <div style="flex: 1;">
+                        <div style="font-size: 0.85rem; font-weight: bold; color: ${r.completed ? 'var(--neon-green)' : '#fff'};">
+                            ${r.title} ${r.completed ? '✓' : ''}
+                        </div>
+                        <div style="font-size: 0.7rem; color: #777;">${r.author} | ${r.currentPage}/${r.totalPages} pág. (${Math.round((r.currentPage/r.totalPages)*100)}%)</div>
+                    </div>
+                    <div style="display: flex; gap: 5px;">
+                        ${!r.completed ? `<button class="library-btn" onclick="setCurrentReading('${r.id}')">ATIVAR</button>` : ''}
+                        <button class="library-btn" onclick="toggleReadingCompletion('${r.id}')">${r.completed ? 'REABRIR' : 'CONCLUIR'}</button>
+                        <button class="library-btn" onclick="editReading('${r.id}')">EDITAR</button>
+                        <button class="library-btn delete" onclick="deleteReading('${r.id}')">X</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderCurrentReading() {
+            const reading = readings.find(r => r.id === currentReadingId);
+            const titleEl = document.getElementById('current-reading-title');
+            const authorEl = document.getElementById('current-reading-author');
+            const progressEl = document.getElementById('current-reading-progress');
+            const percentEl = document.getElementById('current-reading-percent');
+            const statusEl = document.getElementById('current-reading-status');
+
+            if (reading) {
+                titleEl.textContent = reading.title;
+                authorEl.textContent = "por " + reading.author;
+                progressEl.textContent = `Pág. ${reading.currentPage}/${reading.totalPages}`;
+                const percent = Math.round((reading.currentPage / reading.totalPages) * 100);
+                percentEl.textContent = percent + "%";
+                statusEl.textContent = reading.status;
+                statusEl.style.color = reading.completed ? 'var(--neon-green)' : 'var(--neon-blue)';
+                statusEl.style.borderColor = reading.completed ? 'var(--neon-green)' : 'var(--neon-blue)';
+            } else {
+                titleEl.textContent = "Nenhuma leitura ativa";
+                authorEl.textContent = "---";
+                progressEl.textContent = "Pág. 0/0";
+                percentEl.textContent = "0%";
+                statusEl.textContent = "Inativo";
+            }
+        }
+
+        function initReadings() {
+            if (readings.length === 0) {
+                // Adiciona uma leitura inicial de exemplo
+                const example = {
+                    id: 'init-1',
+                    title: "Meu Nerd Inocente",
+                    author: "Natália Tilcailo",
+                    currentPage: 1,
+                    totalPages: 250,
+                    type: 'Livro',
+                    category: 'Pessoal',
+                    status: 'Em andamento',
+                    completed: false
+                };
+                readings.push(example);
+                currentReadingId = example.id;
+                localStorage.setItem('reading_list', JSON.stringify(readings));
+                localStorage.setItem('current_reading_id', currentReadingId);
+            }
+            renderLibrary();
+            renderCurrentReading();
+        }
+
+        // --- API Data Fetching ---
+        async function fetchWithToken(url) {
+            if (!accessToken) return null;
+            const response = await fetch(url, {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            if (!response.ok) {
+                if (response.status === 401) {
+                    console.error("Token expirado ou inválido.");
+                    accessToken = null;
+                    localStorage.removeItem('google_access_token');
+                }
+                throw new Error(`API Error: ${response.status} ${response.statusText} for ${url}`);
+            }
+            return await response.json();
+        }
+
+        async function fetchDashboardData() {
+            const sysLog = document.getElementById('system-log');
+
+            if (!accessToken) {
+                sysLog.textContent = "Autorização pendente. Clique em Sincronizar APIs.";
+                sysLog.style.color = "var(--neon-pink)";
+                return;
+            }
+
+            sysLog.textContent = "Iniciando sincronização...";
+            sysLog.style.color = "var(--neon-blue)";
+
+            // 1. Gmail
+            try {
+                sysLog.textContent = "Sincronizando Gmail...";
+                const query = encodeURIComponent('is:unread in:inbox');
+                const mailData = await fetchWithToken(`https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${query}&maxResults=1`);
+
+                let count = 0;
+                if (mailData && mailData.resultSizeEstimate !== undefined) {
+                    count = mailData.resultSizeEstimate;
+                }
+                animateValueElement(document.getElementById('card-emails'), count);
+                sysLog.textContent = `Gmail OK: ${count} emails não lidos`;
+                sysLog.style.color = "var(--neon-green)";
+            } catch (e) {
+                console.error("Erro Gmail:", e);
+                document.getElementById('card-emails').textContent = "Err";
+                sysLog.textContent = `Erro Gmail: ${e.message}`;
+                sysLog.style.color = "var(--neon-pink)";
+            }
+
+            sysLog.textContent = `Sincronização completa (Gmail + Dashboard Local).`;
+            sysLog.style.color = "var(--neon-green)";
+        }
+
+        // --- LOGICA DE MISSOES DINAMICAS ---
+        let missionsConfig = {};
+        let parentMissions = [];
+        let expandedMissions = new Set();
+        let missionIdToDelete = null;
+
+        const defaultMissions = [
+            {
+                id: 'm-amanha-1',
+                title: 'Assistir à gravação da live do curso: PrograMaria Sprint IA no trabalho',
+                category: 'lives',
+                deadline: '2026-05-18',
+                priority: 'alta',
+                status: 'Pendente',
+                tags: ['IA', 'Sprint'],
+                completed: false,
+                link: 'https://www.youtube.com/live/m1VRpXnPRKw?si=wTi3OJisnXTdDN2d',
+                description: 'Assunto essencial para o sprint acadêmico.',
+                subtasks: []
+            },
+            {
+                id: 'm-amanha-2',
+                title: 'Fazer Módulo 5: Integração e Produtos com IA',
+                category: 'python',
+                deadline: '2026-05-18',
+                priority: 'alta',
+                status: 'Pendente',
+                tags: ['Módulo 5', 'IA'],
+                completed: false,
+                link: '',
+                description: 'Praticar integrações via API no repositório.',
+                subtasks: []
+            },
+            {
+                id: 'm-2405-1',
+                title: 'Desenvolvimento Humano — Unidade 1',
+                category: 'faculdade',
+                deadline: '2026-05-24',
+                priority: 'alta',
+                status: 'Pendente',
+                tags: ['EAD', 'Unidade 1'],
+                completed: false,
+                link: 'https://www.eadunifatecie.com.br/pluginfile.php?file=%2F19485322%2Fmod_resource%2Fcontent%2F1%2FDESENVOLVIMENTO%20HUMANO.pdf',
+                description: 'Ler o PDF principal da primeira unidade.',
+                subtasks: [
+                    { id: 'sub-1-1', title: 'Ler conteúdo/PDF da Unidade 1', completed: false, xp: 10, category: 'leituras' },
+                    { id: 'sub-1-2', title: 'Assistir videoaula 1 da Unidade 1', completed: false, xp: 15, category: 'faculdade' },
+                    { id: 'sub-1-3', title: 'Assistir videoaula 2 da Unidade 1', completed: false, xp: 15, category: 'faculdade' }
+                ]
+            },
+            {
+                id: 'm-2405-2',
+                title: 'Desenvolvimento Humano — Unidade 2',
+                category: 'faculdade',
+                deadline: '2026-05-24',
+                priority: 'alta',
+                status: 'Pendente',
+                tags: ['EAD', 'Unidade 2'],
+                completed: false,
+                link: 'https://www.eadunifatecie.com.br/pluginfile.php?file=%2F19485322%2Fmod_resource%2Fcontent%2F1%2FDESENVOLVIMENTO%20HUMANO.pdf',
+                description: 'Unidade com foco no desenvolvimento psicossocial.',
+                subtasks: [
+                    { id: 'sub-2-1', title: 'Ler conteúdo/PDF da Unidade 2', completed: false, xp: 10, category: 'leituras' },
+                    { id: 'sub-2-2', title: 'Assistir videoaula 1 da Unidade 2', completed: false, xp: 15, category: 'faculdade' },
+                    { id: 'sub-2-3', title: 'Assistir videoaula 2 da Unidade 2', completed: false, xp: 15, category: 'faculdade' }
+                ]
+            },
+            {
+                id: 'm-2405-3',
+                title: 'Economia — Unidade 1',
+                category: 'faculdade',
+                deadline: '2026-05-24',
+                priority: 'alta',
+                status: 'Pendente',
+                tags: ['EAD', 'Unidade 1'],
+                completed: false,
+                link: 'https://www.eadunifatecie.com.br/pluginfile.php?file=%2F18776800%2Fmod_resource%2Fcontent%2F1%2FEconomia%20-%20Unifatecie.pdf',
+                description: 'Introdução aos conceitos de microeconomia e macroeconomia.',
+                subtasks: [
+                    { id: 'sub-3-1', title: 'Ler conteúdo/PDF da Unidade 1', completed: false, xp: 10, category: 'leituras' },
+                    { id: 'sub-3-2', title: 'Assistir videoaula 1 da Unidade 1', completed: false, xp: 15, category: 'faculdade' },
+                    { id: 'sub-3-3', title: 'Assistir videoaula 2 da Unidade 1', completed: false, xp: 15, category: 'faculdade' }
+                ]
+            },
+            {
+                id: 'm-2405-4',
+                title: 'Economia — Unidade 2',
+                category: 'faculdade',
+                deadline: '2026-05-24',
+                priority: 'alta',
+                status: 'Pendente',
+                tags: ['EAD', 'Unidade 2'],
+                completed: false,
+                link: 'https://www.eadunifatecie.com.br/pluginfile.php?file=%2F18776800%2Fmod_resource%2Fcontent%2F1%2FEconomia%20-%20Unifatecie.pdf',
+                description: 'Conceitos de elasticidade de preço e mercado.',
+                subtasks: [
+                    { id: 'sub-4-1', title: 'Ler conteúdo/PDF da Unidade 2', completed: false, xp: 10, category: 'leituras' },
+                    { id: 'sub-4-2', title: 'Assistir videoaula 1 da Unidade 2', completed: false, xp: 15, category: 'faculdade' },
+                    { id: 'sub-4-3', title: 'Assistir videoaula 2 da Unidade 2', completed: false, xp: 15, category: 'faculdade' }
+                ]
+            }
+        ];
+
+        let missions = JSON.parse(localStorage.getItem('missions_list') || 'null');
+
+        function getLocalYYYYMMDD(date) {
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'Sem prazo';
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return dateStr;
+            return `${parts[2]}/${parts[1]}`;
+        }
+
+        function capitalize(str) {
+            if (!str) return '';
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function saveMissionsToStorage() {
+            localStorage.setItem('missions_list', JSON.stringify(missions));
+            
+            // Sincroniza completedMissions para integração com o Gmail e leitura
+            const completedMap = {};
+            missions.forEach(m => {
+                completedMap[m.id] = m.completed;
+                if (m.subtasks) {
+                    m.subtasks.forEach(s => {
+                        completedMap[s.id] = s.completed;
+                    });
+                }
+            });
+            localStorage.setItem('completedMissions', JSON.stringify(completedMap));
+            updateMissionsConfig();
+            updateParentMissions();
+        }
+
+        function updateMissionsConfig() {
+            missionsConfig = {};
+            missions.forEach(m => {
+                missionsConfig[m.id] = {
+                    category: m.category.toLowerCase(),
+                    xp: m.subtasks && m.subtasks.length > 0 ? 0 : 20
+                };
+                if (m.subtasks) {
+                    m.subtasks.forEach(s => {
+                        missionsConfig[s.id] = {
+                            category: s.category ? s.category.toLowerCase() : m.category.toLowerCase(),
+                            xp: s.xp || 15,
+                            parent: m.id
+                        };
+                    });
+                }
+            });
+        }
+
+        function updateParentMissions() {
+            parentMissions = missions.filter(m => m.subtasks && m.subtasks.length > 0).map(m => m.id);
+        }
+
+        function initMissions() {
+            if (!missions) {
+                missions = JSON.parse(JSON.stringify(defaultMissions));
+                saveMissionsToStorage();
+            } else {
+                updateMissionsConfig();
+                updateParentMissions();
+            }
+            renderMissions();
+            setTimeout(() => updateDynamicStats(), 100);
+        }
+
+        function toggleSubtasks(parentId) {
+            const container = document.getElementById('subtasks-' + parentId);
+            const expandBadge = document.querySelector(`#${parentId} .meta-badge.expand`);
+            if (!container) return;
+
+            if (expandedMissions.has(parentId)) {
+                expandedMissions.delete(parentId);
+                container.style.display = 'none';
+                if (expandBadge) expandBadge.innerHTML = `▼ Expandir Subtarefas (${getSubtaskStatusText(parentId)})`;
+            } else {
+                expandedMissions.add(parentId);
+                container.style.display = 'block';
+                if (expandBadge) expandBadge.innerHTML = `▲ Recolher Subtarefas (${getSubtaskStatusText(parentId)})`;
+            }
+        }
+
+        function getSubtaskStatusText(parentId) {
+            const m = missions.find(x => x.id === parentId);
+            if (!m || !m.subtasks) return '0/0';
+            const completed = m.subtasks.filter(s => s.completed).length;
+            return `${completed}/${m.subtasks.length}`;
+        }
+
+        function toggleMission(missionId) {
+            let found = false;
+            
+            // Verifica missão principal
+            const mainMission = missions.find(m => m.id === missionId);
+            if (mainMission) {
+                mainMission.completed = !mainMission.completed;
+                mainMission.status = mainMission.completed ? 'Concluída' : 'Pendente';
+                if (mainMission.subtasks) {
+                    mainMission.subtasks.forEach(sub => {
+                        sub.completed = mainMission.completed;
+                    });
+                }
+                found = true;
+            } else {
+                // Verifica subtarefas
+                missions.forEach(m => {
+                    if (m.subtasks) {
+                        const sub = m.subtasks.find(s => s.id === missionId);
+                        if (sub) {
+                            sub.completed = !sub.completed;
+                            const allSubCompleted = m.subtasks.every(s => s.completed);
+                            m.completed = allSubCompleted;
+                            m.status = m.completed ? 'Concluída' : 'Pendente';
+                            found = true;
+                        }
+                    }
+                });
+            }
+
+            if (found) {
+                saveMissionsToStorage();
+                renderMissions();
+                updateDynamicStats();
+            }
+        }
+
+        // --- Drag and Drop Handlers ---
+        let draggedMissionId = null;
+
+        function handleDragStart(e, id) {
+            draggedMissionId = id;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', id);
+            e.currentTarget.classList.add('dragging');
+        }
+
+        function handleDragEnd(e) {
+            e.currentTarget.classList.remove('dragging');
+            document.querySelectorAll('.mission-group-container').forEach(c => c.classList.remove('drag-over'));
+            draggedMissionId = null;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e, targetGroup, targetMissionId = null) {
+            e.preventDefault();
+            document.querySelectorAll('.mission-group-container').forEach(c => c.classList.remove('drag-over'));
+
+            const id = e.dataTransfer.getData('text/plain') || draggedMissionId;
+            if (!id) return;
+
+            const missionIndex = missions.findIndex(m => m.id === id);
+            if (missionIndex === -1) return;
+
+            const mission = missions[missionIndex];
+            const todayStr = getLocalYYYYMMDD(new Date());
+
+            // Identificar grupo se targetGroup estiver em branco
+            let finalGroup = targetGroup;
+            if (!finalGroup && targetMissionId) {
+                const targetMission = missions.find(m => m.id === targetMissionId);
+                if (targetMission) {
+                    if (targetMission.completed) finalGroup = 'concluidas';
+                    else if (targetMission.deadline < todayStr) finalGroup = 'atrasadas';
+                    else if (targetMission.deadline === todayStr) finalGroup = 'hoje';
+                    else finalGroup = 'semana';
+                }
+            }
+
+            if (finalGroup) {
+                if (finalGroup === 'concluidas') {
+                    mission.completed = true;
+                    mission.status = 'Concluída';
+                    if (mission.subtasks) {
+                        mission.subtasks.forEach(s => s.completed = true);
+                    }
+                } else {
+                    if (mission.completed) {
+                        mission.completed = false;
+                        mission.status = 'Pendente';
+                    }
+
+                    if (finalGroup === 'hoje') {
+                        mission.deadline = todayStr;
+                    } else if (finalGroup === 'atrasadas') {
+                        const yesterday = new Date();
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        mission.deadline = getLocalYYYYMMDD(yesterday);
+                    } else if (finalGroup === 'semana') {
+                        if (mission.deadline <= todayStr) {
+                            const tomorrow = new Date();
+                            tomorrow.setDate(tomorrow.getDate() + 1);
+                            mission.deadline = getLocalYYYYMMDD(tomorrow);
+                        }
+                    }
+                }
+            }
+
+            // Mover ordem no array
+            missions.splice(missionIndex, 1);
+
+            if (targetMissionId) {
+                const targetIndex = missions.findIndex(m => m.id === targetMissionId);
+                if (targetIndex !== -1) {
+                    missions.splice(targetIndex, 0, mission);
+                } else {
+                    missions.push(mission);
+                }
+            } else {
+                missions.push(mission);
+            }
+
+            saveMissionsToStorage();
+            renderMissions();
+            updateDynamicStats();
+        }
+
+        // --- Custom Confirm Modal Logic ---
+        function deleteMissionPrompt(id) {
+            missionIdToDelete = id;
+            document.getElementById('confirm-modal').style.display = 'flex';
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal').style.display = 'none';
+            missionIdToDelete = null;
+        }
+
+        function deleteMission(id) {
+            missions = missions.filter(m => m.id !== id);
+            saveMissionsToStorage();
+            renderMissions();
+            updateDynamicStats();
+        }
+
+        // --- Modal de Missão Logic ---
+        function openNewMissionModal() {
+            document.getElementById('modal-title').textContent = '> NOVA MISSÃO';
+            document.getElementById('modal-mission-id').value = '';
+            document.getElementById('mission-input-title').value = '';
+            document.getElementById('mission-input-description').value = '';
+            document.getElementById('mission-input-category').value = 'faculdade';
+            document.getElementById('mission-input-priority').value = 'alta';
+            document.getElementById('mission-input-deadline').value = getLocalYYYYMMDD(new Date());
+            document.getElementById('mission-input-status').value = 'Pendente';
+            document.getElementById('mission-input-tags').value = '';
+            document.getElementById('mission-input-link').value = '';
+            document.getElementById('modal-subtasks-container').innerHTML = '';
+            document.getElementById('mission-modal').style.display = 'flex';
+        }
+
+        function openEditMissionModal(id) {
+            const m = missions.find(x => x.id === id);
+            if (!m) return;
+
+            document.getElementById('modal-title').textContent = '> EDITAR MISSÃO';
+            document.getElementById('modal-mission-id').value = m.id;
+            document.getElementById('mission-input-title').value = m.title;
+            document.getElementById('mission-input-description').value = m.description || '';
+            document.getElementById('mission-input-category').value = m.category;
+            document.getElementById('mission-input-priority').value = m.priority;
+            document.getElementById('mission-input-deadline').value = m.deadline;
+            document.getElementById('mission-input-status').value = m.completed ? 'Concluída' : m.status;
+            document.getElementById('mission-input-tags').value = m.tags ? m.tags.join(', ') : '';
+            document.getElementById('mission-input-link').value = m.link || '';
+
+            const container = document.getElementById('modal-subtasks-container');
+            container.innerHTML = '';
+            if (m.subtasks) {
+                m.subtasks.forEach(s => {
+                    addModalSubtask(s.title, s.category, s.completed, s.id);
+                });
+            }
+
+            document.getElementById('mission-modal').style.display = 'flex';
+        }
+
+        function closeMissionModal() {
+            document.getElementById('mission-modal').style.display = 'none';
+        }
+
+        function addModalSubtask(title = '', category = 'faculdade', completed = false, id = '') {
+            const container = document.getElementById('modal-subtasks-container');
+            const div = document.createElement('div');
+            div.className = 'modal-subtask-item';
+            div.dataset.id = id || 'sub-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+            div.dataset.completed = completed;
+
+            div.innerHTML = `
+                <input type="text" class="subtask-modal-title" placeholder="Título da subtarefa..." value="${title.replace(/"/g, '&quot;')}">
+                <select class="subtask-modal-category">
+                    <option value="faculdade" ${category === 'faculdade' ? 'selected' : ''}>Faculdade</option>
+                    <option value="leituras" ${category === 'leituras' ? 'selected' : ''}>Leituras</option>
+                    <option value="python" ${category === 'python' ? 'selected' : ''}>Python</option>
+                    <option value="tarefas" ${category === 'tarefas' ? 'selected' : ''}>Tarefas</option>
+                    <option value="lives" ${category === 'lives' ? 'selected' : ''}>Lives</option>
+                </select>
+                <button type="button" class="btn-subtask-del" onclick="this.parentElement.remove()">✖</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function saveMissionFromModal() {
+            const id = document.getElementById('modal-mission-id').value;
+            const title = document.getElementById('mission-input-title').value.trim();
+            const description = document.getElementById('mission-input-description').value.trim();
+            const category = document.getElementById('mission-input-category').value;
+            const priority = document.getElementById('mission-input-priority').value;
+            const deadline = document.getElementById('mission-input-deadline').value;
+            const status = document.getElementById('mission-input-status').value;
+            const tagsInput = document.getElementById('mission-input-tags').value;
+            const tags = tagsInput.split(',').map(t => t.trim()).filter(t => t !== '');
+            const link = document.getElementById('mission-input-link').value.trim();
+
+            if (!title) {
+                alert("⚠️ Por favor, preencha o título da missão.");
+                return;
+            }
+            if (!deadline) {
+                alert("⚠️ Por favor, escolha um prazo para a missão.");
+                return;
+            }
+
+            // Subtarefas
+            const subtaskItems = document.querySelectorAll('.modal-subtask-item');
+            const subtasks = [];
+            subtaskItems.forEach(item => {
+                const subTitle = item.querySelector('.subtask-modal-title').value.trim();
+                const subCat = item.querySelector('.subtask-modal-category').value;
+                const subId = item.dataset.id;
+                const subCompleted = item.dataset.completed === 'true';
+
+                if (subTitle) {
+                    let xp = 15;
+                    let cat = subCat;
+                    if (subTitle.toLowerCase().includes('ler') || subTitle.toLowerCase().includes('pdf')) {
+                        xp = 10;
+                        cat = 'leituras';
+                    }
+                    subtasks.push({
+                        id: subId,
+                        title: subTitle,
+                        category: cat,
+                        xp: xp,
+                        completed: subCompleted
+                    });
+                }
+            });
+
+            let completed = (status === 'Concluída');
+            if (subtasks.length > 0) {
+                if (status === 'Concluída') {
+                    subtasks.forEach(s => s.completed = true);
+                } else if (status === 'Pendente') {
+                    subtasks.forEach(s => s.completed = false);
+                    completed = false;
+                } else {
+                    completed = subtasks.every(s => s.completed);
+                }
+            }
+
+            const missionData = {
+                id: id || 'm-' + Date.now(),
+                title,
+                description,
+                category,
+                priority,
+                deadline,
+                status: completed ? 'Concluída' : (status === 'Concluída' ? 'Pendente' : status),
+                tags,
+                link,
+                subtasks,
+                completed
+            };
+
+            if (id) {
+                const index = missions.findIndex(m => m.id === id);
+                if (index > -1) {
+                    missions[index] = missionData;
+                }
+            } else {
+                missions.push(missionData);
+            }
+
+            saveMissionsToStorage();
+            renderMissions();
+            updateDynamicStats();
+            closeMissionModal();
+        }
+
+        // --- Render Lists ---
+        function renderSubtasksHTML(mission) {
+            if (!mission.subtasks || mission.subtasks.length === 0) return '';
+            const isExpanded = expandedMissions.has(mission.id);
+            return `
+                <div class="mission-subtasks" id="subtasks-${mission.id}" style="display: ${isExpanded ? 'block' : 'none'};">
+                    ${mission.subtasks.map(sub => `
+                        <div class="subtask-row ${sub.completed ? 'completed' : ''}" id="${sub.id}" onclick="toggleMission('${sub.id}')">
+                            <div class="checkbox-ui sub"><span class="checkmark">✓</span></div>
+                            <div class="subtask-title">${sub.title}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function getMissionCardHTML(m) {
+            const isCompleted = m.completed;
+            const formattedDate = formatDate(m.deadline);
+            const priorityClass = m.priority.toLowerCase();
+            const priorityLabel = m.priority.toUpperCase();
+            const categoryLabel = capitalize(m.category);
+
+            const tagsHTML = m.tags && m.tags.length > 0 
+                ? m.tags.map(t => `<span class="meta-badge" style="background: rgba(255, 255, 255, 0.05); color: #bbb; border: 1px solid #444;">#${t}</span>`).join(' ') 
+                : '';
+
+            const totalSub = m.subtasks ? m.subtasks.length : 0;
+            const completedSub = m.subtasks ? m.subtasks.filter(s => s.completed).length : 0;
+            const hasSub = totalSub > 0;
+
+            const expandLabel = hasSub 
+                ? `<span class="meta-badge expand" onclick="event.stopPropagation(); toggleSubtasks('${m.id}')">${expandedMissions.has(m.id) ? '▲ Recolher' : '▼ Expandir'} Subtarefas (${completedSub}/${totalSub})</span>`
+                : '';
+
+            const linkHTML = m.link 
+                ? `<a href="${m.link}" target="_blank" onclick="event.stopPropagation();" style="margin-left: 8px; color: var(--neon-blue); text-decoration: none; border: 1px solid var(--neon-blue); padding: 1px 6px; border-radius: 4px; font-size: 0.75rem; transition: all 0.2s;">${m.link.includes('pdf') || m.link.includes('drive') ? '📄 PDF' : '📺 Link'}</a>`
+                : '';
+
+            const descriptionHTML = m.description 
+                ? `<div class="mission-description" style="font-size: 0.75rem; color: #888; font-style: italic; margin-top: 4px; line-height: 1.3;">${m.description}</div>`
+                : '';
+
+            return `
+                <div class="mission-card ${isCompleted ? 'completed' : ''} ${hasSub ? 'has-subtasks' : ''}" 
+                     id="${m.id}" 
+                     draggable="true"
+                     ondragstart="handleDragStart(event, '${m.id}')"
+                     ondragend="handleDragEnd(event)"
+                     ondragover="handleDragOver(event)"
+                     ondrop="event.stopPropagation(); handleDrop(event, '', '${m.id}')"
+                     style="cursor: grab;">
+                    <div class="mission-header" onclick="${hasSub ? `toggleSubtasks('${m.id}')` : `toggleMission('${m.id}')`}">
+                        <div class="checkbox-ui ${hasSub ? 'parent-checkbox' : ''}" onclick="event.stopPropagation(); toggleMission('${m.id}')">
+                            <span class="checkmark">✓</span>
+                        </div>
+                        <div class="mission-info" style="text-align: left;">
+                            <div class="mission-title" style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                                <span>${m.title}</span>
+                                ${linkHTML}
+                            </div>
+                            ${descriptionHTML}
+                            <div class="mission-meta" style="margin-top: 6px;">
+                                <span class="meta-badge time">Prazo: ${formattedDate}</span>
+                                <span class="meta-badge priority ${priorityClass}">${priorityLabel}</span>
+                                <span class="meta-badge category">${categoryLabel}</span>
+                                <span class="meta-badge status">${isCompleted ? 'Concluída' : m.status}</span>
+                                ${tagsHTML}
+                                ${expandLabel}
+                            </div>
+                        </div>
+                        <div class="mission-actions" style="margin-left: 15px; display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; align-self: center;">
+                            <button class="btn-action-edit" onclick="event.stopPropagation(); openEditMissionModal('${m.id}')">✏ Editar</button>
+                            <button class="btn-action-delete" onclick="event.stopPropagation(); deleteMissionPrompt('${m.id}')">🗑️ Excluir</button>
+                        </div>
+                    </div>
+                    ${renderSubtasksHTML(m)}
+                </div>
+            `;
+        }
+
+        function renderMissions() {
+            const todayStr = getLocalYYYYMMDD(new Date());
+
+            const concluidas = missions.filter(m => m.completed);
+            const atrasadas = missions.filter(m => !m.completed && m.deadline < todayStr);
+            const hoje = missions.filter(m => !m.completed && m.deadline === todayStr);
+            const semana = missions.filter(m => !m.completed && m.deadline > todayStr);
+
+            const renderGroup = (containerId, groupList) => {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+
+                if (groupList.length === 0) {
+                    container.innerHTML = `<div style="text-align: center; color: #555; padding: 15px; font-size: 0.8rem; font-style: italic;">Nenhuma missão nesta categoria.</div>`;
+                } else {
+                    container.innerHTML = groupList.map(m => getMissionCardHTML(m)).join('');
+                }
+            };
+
+            renderGroup('group-hoje', hoje);
+            renderGroup('group-semana', semana);
+            renderGroup('group-atrasadas', atrasadas);
+            renderGroup('group-concluidas', concluidas);
+        }
+
+        function restoreDefaultMissionsPrompt() {
+            if (confirm("Tem certeza que deseja restaurar as missões padrão? Suas missões personalizadas serão perdidas.")) {
+                missions = JSON.parse(JSON.stringify(defaultMissions));
+                saveMissionsToStorage();
+                renderMissions();
+                updateDynamicStats();
+                alert("📚 Missões padrão restauradas com sucesso!");
+            }
+        }
+
+        function updateDynamicStats() {
+            const completedMissions = JSON.parse(localStorage.getItem('completedMissions') || '{}');
+
+            let totalXp = 0;
+            const progressData = { faculdade: 0, python: 0, leituras: 0, tarefas: 0, lives: 0 };
+
+            let raidsCount = 0;
+            let questsCount = 0;
+
+            // Missões Configuradas
+            Object.keys(completedMissions).forEach(missionId => {
+                if (completedMissions[missionId] && missionsConfig[missionId]) {
+                    const mission = missionsConfig[missionId];
+                    totalXp += mission.xp;
+                    if (progressData[mission.category] !== undefined) {
+                        progressData[mission.category]++;
+                    }
+                }
+            });
+
+            // Leituras do Sistema (apenas as concluídas)
+            if (typeof readings !== 'undefined') {
+                readings.forEach(reading => {
+                    if (reading.completed) {
+                        totalXp += 50; // XP por livro/leitura concluída
+                        progressData.leituras++;
+                    }
+                });
+            }
+
+            // RAIDS e QUESTS (Baseado nas Missões de Hoje e Atrasadas)
+            const todayStr = getLocalYYYYMMDD(new Date());
+            missions.forEach(m => {
+                if (!m.completed && m.deadline <= todayStr) {
+                    questsCount++;
+                    if (m.category.toLowerCase() === 'lives') {
+                        raidsCount++;
+                    }
+                }
+            });
+
+            // Atualiza visualmente os cards superiores
+            document.getElementById('card-calendar').textContent = raidsCount;
+            document.getElementById('card-tasks').textContent = questsCount;
+
+            // Atualizar XP e Nível
+            const level = Math.floor(totalXp / 100) + 1;
+            const percent = totalXp % 100;
+            let levelTitle = 'Calouro';
+            if (level === 2) levelTitle = 'Estudante';
+            if (level === 3) levelTitle = 'Veterano';
+            if (level >= 4) levelTitle = 'Mestre';
+
+            document.getElementById('xp-level').textContent = level;
+            document.getElementById('xp-title').textContent = '(' + levelTitle + ')';
+
+            // Animação de percentual visual e preenchimento
+            const xpPercentEl = document.getElementById('xp-percent');
+            xpPercentEl.textContent = percent;
+            document.getElementById('xp-bar-fill').style.width = percent + '%';
+
+            // Atualizar Gráfico
+            if (window.progressChartInstance) {
+                window.progressChartInstance.data.datasets[0].data = [
+                    progressData.faculdade,
+                    progressData.python,
+                    progressData.leituras,
+                    progressData.tarefas,
+                    progressData.lives
+                ];
+                window.progressChartInstance.update();
+            }
+        }
+
+        function resetProgress() {
+            if (confirm("Tem certeza que deseja zerar seu progresso acadêmico? Suas missões e subtarefas serão desmarcadas (retornando a pendente), mas não serão excluídas da tela.")) {
+                missions.forEach(m => {
+                    m.completed = false;
+                    m.status = 'Pendente';
+                    if (m.subtasks) {
+                        m.subtasks.forEach(s => s.completed = false);
+                    }
+                });
+                saveMissionsToStorage();
+                renderMissions();
+                updateDynamicStats();
+            }
+        }
+
+        // Formatar data em estilo de log
+        function updateDate() {
+            const dateElement = document.getElementById('current-date');
+            const today = new Date();
+
+            const dateStr = today.toLocaleDateString('pt-BR');
+            const timeStr = today.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+            dateElement.textContent = `${dateStr} [${timeStr}]`;
+        }
+
+        // Animação de contagem
+        function animateValueElement(element, finalValue) {
+            const duration = 1200;
+            const startTime = performance.now();
+            element.textContent = '0';
+
+            function updateNumber(currentTime) {
+                const elapsedTime = currentTime - startTime;
+                if (elapsedTime < duration) {
+                    const progress = elapsedTime / duration;
+                    const currentValue = Math.floor(progress * finalValue);
+                    element.textContent = currentValue;
+                    requestAnimationFrame(updateNumber);
+                } else {
+                    element.textContent = finalValue;
+                }
+            }
+
+            requestAnimationFrame(updateNumber);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializa confirm modal events
+            document.getElementById('confirm-yes-btn').addEventListener('click', () => {
+                if (missionIdToDelete) {
+                    deleteMission(missionIdToDelete);
+                    closeConfirmModal();
+                }
+            });
+
+            initMissions();
+
+            // Inicializa o Google Identity Services Client para fluxo de Access Token
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: '708279528701-d5n7agacu49dn9kobcq9n036clqgal4r.apps.googleusercontent.com',
+                scope: 'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/tasks.readonly',
+                prompt: 'select_account',
+                callback: (tokenResponse) => {
+                    if (tokenResponse && tokenResponse.access_token) {
+                        console.log("Token recebido. Status: OK");
+                        accessToken = tokenResponse.access_token;
+
+                        // Calcula expiração (padrão 3600s)
+                        const expiresAt = Date.now() + (tokenResponse.expires_in * 1000);
+
+                        localStorage.setItem('google_access_token', accessToken);
+                        localStorage.setItem('google_expires_at', expiresAt);
+
+                        updateUI();
+                        fetchDashboardData();
+                    } else if (tokenResponse.error) {
+                        console.group("Erro de Autenticação Google");
+                        console.error("Erro:", tokenResponse.error);
+                        console.error("Descrição:", tokenResponse.error_description);
+                        console.error("Escopos solicitados:", tokenResponse.scope);
+                        console.groupEnd();
+
+                        alert("Falha na autenticação: " + (tokenResponse.error_description || tokenResponse.error));
+                    }
+                },
+            });
+
+            // Inicializa link de Raid
+            initRaidLink();
+            initPortals();
+            initReadings();
+
+            // Verifica estado do login (e se o token ainda é válido)
+            if (checkLoginState()) {
+                fetchDashboardData();
+            }
+
+            updateDate();
+            // Atualiza o relógio a cada minuto
+            setInterval(updateDate, 60000);
+
+            // Inicializar Gráfico de Progresso
+            const ctx = document.getElementById('progressChart').getContext('2d');
+
+            window.progressChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Faculdade', 'Python', 'Leituras', 'Tarefas', 'Lives'],
+                    datasets: [{
+                        label: 'Tarefas Concluídas',
+                        data: [0, 0, 0, 0, 0], // Inicialmente zerado
+                        backgroundColor: 'rgba(0, 243, 255, 0.2)',
+                        borderColor: '#00f3ff',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        hoverBackgroundColor: 'rgba(0, 243, 255, 0.6)',
+                        hoverBorderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)',
+                                borderColor: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#888',
+                                font: { family: "'Fira Code', monospace" },
+                                stepSize: 5
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false,
+                            },
+                            ticks: {
+                                color: '#aaa',
+                                font: { family: "'Fira Code', monospace" }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 17, 17, 0.9)',
+                            titleFont: { family: "'Fira Code', monospace" },
+                            bodyFont: { family: "'Fira Code', monospace" },
+                            borderColor: '#00f3ff',
+                            borderWidth: 1
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

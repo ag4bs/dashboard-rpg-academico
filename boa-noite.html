@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Boa Noite, Nerd 🌙</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a14;
+      --surface: rgba(255,255,255,0.03);
+      --border: rgba(255,255,255,0.07);
+      --purple: #a855f7;
+      --cyan: #22d3ee;
+      --green: #4ade80;
+      --yellow: #facc15;
+      --pink: #f472b6;
+      --orange: #fb923c;
+      --text: #e2e8f0;
+      --muted: #64748b;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      overflow-x: hidden;
+      overflow-y: auto;
+      position: relative;
+      padding: 40px 16px;
+    }
+
+    /* ── Starfield ── */
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: #fff;
+      animation: twinkle var(--d, 3s) ease-in-out infinite;
+      opacity: 0;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0; transform: scale(1); }
+      50%       { opacity: var(--o, .8); transform: scale(1.3); }
+    }
+
+    /* ── Gradient orbs ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+      z-index: 0;
+      animation: drift 12s ease-in-out infinite alternate;
+    }
+    .orb-1 { width: 500px; height: 500px; background: rgba(168,85,247,.15); top: -150px; left: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: rgba(34,211,238,.10); bottom: -100px; right: -80px; animation-delay: -4s; }
+    .orb-3 { width: 300px; height: 300px; background: rgba(244,114,182,.08); bottom: 10%; left: 10%; animation-delay: -8s; }
+    @keyframes drift { to { transform: translate(40px, 30px) scale(1.1); } }
+
+    /* ── Floating code snippets ── */
+    .code-float {
+      position: fixed;
+      font-family: 'Fira Code', monospace;
+      font-size: 11px;
+      opacity: 0.07;
+      pointer-events: none;
+      z-index: 0;
+      animation: floatUp linear infinite;
+      white-space: nowrap;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(100vh) rotate(-3deg); opacity: 0; }
+      10%  { opacity: 0.07; }
+      90%  { opacity: 0.07; }
+      100% { transform: translateY(-20vh) rotate(3deg); opacity: 0; }
+    }
+
+    /* ── Main card ── */
+    .card {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 56px 64px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      backdrop-filter: blur(20px);
+      max-width: 680px;
+      width: 90%;
+      box-shadow:
+        0 0 0 1px rgba(168,85,247,.1),
+        0 30px 80px rgba(0,0,0,.5),
+        inset 0 1px 0 rgba(255,255,255,.07);
+      animation: fadeIn .9s ease both;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px) scale(.96); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ── Moon ── */
+    .moon-wrap {
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: center;
+    }
+    .moon {
+      font-size: 72px;
+      display: inline-block;
+      filter: drop-shadow(0 0 28px rgba(250,204,21,.6));
+      animation: moonFloat 4s ease-in-out infinite;
+    }
+    @keyframes moonFloat {
+      0%, 100% { transform: translateY(0) rotate(-5deg); }
+      50%       { transform: translateY(-12px) rotate(5deg); }
+    }
+
+    /* ── Greeting ── */
+    .greeting {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(2.4rem, 6vw, 3.6rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--purple), var(--cyan), var(--pink));
+      background-size: 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradShift 4s linear infinite;
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+    @keyframes gradShift { to { background-position: 200% center; } }
+
+    .sub-greeting {
+      font-family: 'Fira Code', monospace;
+      font-size: 1rem;
+      color: var(--green);
+      margin-bottom: 40px;
+      opacity: .8;
+    }
+    .sub-greeting::before { content: '// '; color: var(--muted); }
+
+    /* ── Clock ── */
+    .clock-wrap {
+      margin-bottom: 12px;
+    }
+    #clock {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(3rem, 10vw, 5.5rem);
+      font-weight: 700;
+      color: var(--cyan);
+      text-shadow:
+        0 0 20px rgba(34,211,238,.5),
+        0 0 60px rgba(34,211,238,.2);
+      letter-spacing: 4px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { text-shadow: 0 0 20px rgba(34,211,238,.5), 0 0 60px rgba(34,211,238,.2); }
+      50%       { text-shadow: 0 0 30px rgba(34,211,238,.8), 0 0 80px rgba(34,211,238,.35); }
+    }
+
+    /* ── Date ── */
+    #date-line {
+      font-family: 'Fira Code', monospace;
+      font-size: 1rem;
+      color: var(--purple);
+      margin-bottom: 40px;
+      letter-spacing: 1px;
+    }
+    #date-line span.label { color: var(--muted); }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--border), rgba(168,85,247,.3), var(--border), transparent);
+      margin: 0 auto 36px;
+      max-width: 80%;
+    }
+
+    /* ── Nerd badges ── */
+    .badges {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 36px;
+    }
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-family: 'Fira Code', monospace;
+      font-size: .82rem;
+      font-weight: 500;
+      border: 1px solid;
+      transition: transform .22s, box-shadow .22s, background .22s;
+      cursor: pointer;
+      background: none;
+      outline: none;
+      user-select: none;
+    }
+    .badge:hover { transform: translateY(-4px) scale(1.07); }
+    .badge.active { transform: translateY(-4px) scale(1.07); }
+    .badge-purple { color: var(--purple); border-color: rgba(168,85,247,.35); background: rgba(168,85,247,.08); }
+    .badge-purple:hover, .badge-purple.active { box-shadow: 0 0 22px rgba(168,85,247,.45); background: rgba(168,85,247,.18); }
+    .badge-cyan   { color: var(--cyan);   border-color: rgba(34,211,238,.35);  background: rgba(34,211,238,.08); }
+    .badge-cyan:hover,   .badge-cyan.active   { box-shadow: 0 0 22px rgba(34,211,238,.45);  background: rgba(34,211,238,.18); }
+    .badge-green  { color: var(--green);  border-color: rgba(74,222,128,.35);  background: rgba(74,222,128,.08); }
+    .badge-green:hover,  .badge-green.active  { box-shadow: 0 0 22px rgba(74,222,128,.45);  background: rgba(74,222,128,.18); }
+    .badge-yellow { color: var(--yellow); border-color: rgba(250,204,21,.35);  background: rgba(250,204,21,.08); }
+    .badge-yellow:hover, .badge-yellow.active { box-shadow: 0 0 22px rgba(250,204,21,.45);  background: rgba(250,204,21,.18); }
+
+    /* ── Panel ── */
+    .badge-panel {
+      display: none;
+      margin-bottom: 24px;
+      background: rgba(0,0,0,.3);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 14px;
+      padding: 18px 20px;
+      text-align: left;
+      animation: panelIn .3s ease both;
+    }
+    .badge-panel.open { display: block; }
+    @keyframes panelIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .panel-title {
+      font-family: 'Fira Code', monospace;
+      font-size: .75rem;
+      margin-bottom: 12px;
+      opacity: .5;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .panel-items { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .panel-items li {
+      font-family: 'Inter', sans-serif;
+      font-size: .88rem;
+      color: var(--text);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.5;
+    }
+    .panel-items li::before { content: '›'; opacity: .4; flex-shrink: 0; }
+
+    /* ── Terminal quote ── */
+    .terminal {
+      background: #0d0d1a;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 12px;
+      padding: 20px 24px;
+      text-align: left;
+      font-family: 'Fira Code', monospace;
+      font-size: .85rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .terminal::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(168,85,247,.04), transparent 60%);
+      pointer-events: none;
+    }
+    .term-top {
+      display: flex;
+      gap: 7px;
+      margin-bottom: 14px;
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: #28c840; }
+    .term-line { line-height: 1.7; }
+    .term-prompt { color: var(--green); }
+    .term-cmd    { color: var(--cyan); }
+    .term-output { color: var(--muted); display: block; padding-left: 18px; }
+    .term-quote  { color: var(--text); font-style: italic; display: block; padding-left: 18px; }
+    .term-cursor {
+      display: inline-block;
+      width: 9px; height: 1.1em;
+      background: var(--purple);
+      vertical-align: middle;
+      animation: blink 1.1s step-end infinite;
+      margin-left: 3px;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 32px;
+      font-size: .75rem;
+      color: var(--muted);
+      font-family: 'Fira Code', monospace;
+    }
+    .footer span { color: var(--pink); }
+
+    /* ── Spotify ── */
+    .spotify-wrap {
+      margin-bottom: 28px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(30,215,96,.2);
+      box-shadow: 0 0 30px rgba(30,215,96,.08), inset 0 1px 0 rgba(255,255,255,.05);
+      transition: box-shadow .3s;
+    }
+    .spotify-wrap:hover {
+      box-shadow: 0 0 45px rgba(30,215,96,.18);
+    }
+    .spotify-label {
+      font-family: 'Fira Code', monospace;
+      font-size: .78rem;
+      color: #1ed760;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: .85;
+    }
+    .spotify-label::before { content: '▶'; font-size: .65rem; }
+    .divider-spotify {
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(30,215,96,.25), transparent);
+      margin: 0 auto 14px;
+      max-width: 80%;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Starfield -->
+  <div class="stars" id="stars"></div>
+
+  <!-- Orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- Floating code fragments -->
+  <div id="codeFloats"></div>
+
+  <!-- Main card -->
+  <div class="card">
+
+    <div class="moon-wrap"><span class="moon">🌙</span></div>
+
+    <h1 class="greeting">Boa Noite!</h1>
+    <p class="sub-greeting">hora de mergulhar no multiverso</p>
+
+    <div class="clock-wrap">
+      <div id="clock">00:00:00</div>
+    </div>
+    <div id="date-line"><span class="label">📅 </span><span id="date-text"></span></div>
+
+    <div class="divider"></div>
+
+    <div class="badges">
+      <button class="badge badge-purple" id="btn-livros"  onclick="togglePanel('livros')">📚 Livros</button>
+      <button class="badge badge-cyan"   id="btn-codigo"  onclick="togglePanel('codigo')">💻 Código</button>
+      <button class="badge badge-green"  id="btn-jogos"   onclick="togglePanel('jogos')">🎮 Jogos</button>
+      <button class="badge badge-yellow" id="btn-cafe"    onclick="togglePanel('cafe')">⚡ Café</button>
+    </div>
+
+    <div id="panel-livros" class="badge-panel" style="border-color:rgba(168,85,247,.25);">
+      <p class="panel-title" style="color:var(--purple);">📚 leitura da vez</p>
+      <ul class="panel-items">
+        <li>🔭 Sobre os Ombros de Gigantes — Stephen Hawking</li>
+        <li>📖 O Diário de Anne Frank — Anne Frank</li>
+        <li>🧛 Drácula — Bram Stoker</li>
+        <li>🌊 Um Porto Seguro — Nicholas Sparks</li>
+      </ul>
+    </div>
+
+    <div id="panel-codigo" class="badge-panel" style="border-color:rgba(34,211,238,.25);">
+      <p class="panel-title" style="color:var(--cyan);">💻 stack favorita</p>
+      <ul class="panel-items">
+        <li>🪐 Antigravity — meu assistente de IA favorito</li>
+        <li>🐍 Python — scripts, automações e análise de dados</li>
+        <li>📓 Google Colab — notebooks na nuvem sem dor</li>
+        <li>📊 Looker Studio — dados viram dashboards bonitos</li>
+      </ul>
+    </div>
+
+    <div id="panel-jogos" class="badge-panel" style="border-color:rgba(74,222,128,.25);">
+      <p class="panel-title" style="color:var(--green);">🎮 save slots</p>
+      <ul class="panel-items">
+        <li>🗡️ The Legend of Zelda: Breath of the Wild</li>
+        <li>🌍 The Witcher 3: Wild Hunt</li>
+        <li>🏔️ Elden Ring — morreu 147 vezes</li>
+        <li>🚀 Hollow Knight — obra de arte</li>
+        <li>🎭 Disco Elysium — livro interativo de 80h</li>
+      </ul>
+    </div>
+
+    <div id="panel-cafe" class="badge-panel" style="border-color:rgba(250,204,21,.25);">
+      <p class="panel-title" style="color:var(--yellow);">⚡ ordem do dia</p>
+      <ul class="panel-items">
+        <li>☕ Espresso duplo às 23h — totalmente responsável</li>
+        <li>🫖 Chá verde pra fingir que é saudável</li>
+        <li>🧉 Chimarrão — modo programador ativado</li>
+        <li>🍵 Café coado — o clássico que nunca falha</li>
+        <li>💊 Cafeína é um recurso renovável</li>
+      </ul>
+    </div>
+
+    <div class="terminal">
+      <div class="term-top">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+      </div>
+      <div class="term-line">
+        <span class="term-prompt">nerd@universe:~$ </span>
+        <span class="term-cmd">fortune --nerd</span>
+        <span class="term-output"># Citação carregada com sucesso...</span>
+        <span class="term-quote" id="quote"></span>
+        <span class="term-prompt" style="margin-top:6px; display:block;">nerd@universe:~$ <span class="term-cursor"></span></span>
+      </div>
+    </div>
+
+    <div class="divider-spotify"></div>
+    <p class="spotify-label">now playing · playlist nerd</p>
+    <div class="spotify-wrap">
+      <iframe
+        id="spotify-player"
+        style="border-radius:12px"
+        src="https://open.spotify.com/embed/playlist/1Eo8xLS38u3P8U6706sT8d?utm_source=generator&theme=0"
+        width="100%"
+        height="152"
+        frameBorder="0"
+        allowfullscreen=""
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="eager">
+      </iframe>
+    </div>
+
+    <p class="footer">feito com <span>♥</span> e muita cafeína · versão <span>2.0.26</span></p>
+  </div>
+
+  <script>
+    /* ── Badge Panels ── */
+    const panels = ['livros','codigo','jogos','cafe'];
+    function togglePanel(id) {
+      const panel = document.getElementById('panel-' + id);
+      const btn   = document.getElementById('btn-' + id);
+      const isOpen = panel.classList.contains('open');
+
+      // fecha todos
+      panels.forEach(p => {
+        document.getElementById('panel-' + p).classList.remove('open');
+        document.getElementById('btn-' + p).classList.remove('active');
+      });
+
+      // abre o clicado (se estava fechado)
+      if (!isOpen) {
+        panel.classList.add('open');
+        btn.classList.add('active');
+      }
+    }
+    /* ── Quotes ── */
+    const quotes = [
+      '"Qualquer tecnologia suficientemente avançada é indistinguível de magia." — Arthur C. Clarke',
+      '"Primeiro, resolva o problema. Depois, escreva o código." — John Johnson',
+      '"Um leitor vive mil vidas antes de morrer; quem nunca lê, vive apenas uma." — G.R.R. Martin',
+      '"It\'s dangerous to go alone! Take this." — The Legend of Zelda',
+      '"Talk is cheap. Show me the code." — Linus Torvalds',
+      '"O código é poesia... quando funciona." — Programador às 23h',
+      '"Em algum lugar, algo incrível aguarda ser descoberto." — Carl Sagan',
+      '"Não é um bug, é uma feature não documentada." — Lenda da TI',
+      '"A noite é o horário nobre do dev e do leitor." — alguém sábio',
+      '"Stay hungry. Stay foolish." — Steve Jobs',
+    ];
+
+    document.getElementById('quote').textContent =
+      '"' + quotes[Math.floor(Math.random() * quotes.length)].replace(/^"|"$/g, '') + '"';
+
+    /* ── Clock & Date ── */
+    const weekDays = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+    const months   = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+    function tick() {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2,'0');
+      const mm = String(now.getMinutes()).padStart(2,'0');
+      const ss = String(now.getSeconds()).padStart(2,'0');
+      document.getElementById('clock').textContent = `${hh}:${mm}:${ss}`;
+
+      const wd  = weekDays[now.getDay()];
+      const dd  = String(now.getDate()).padStart(2,'0');
+      const mon = months[now.getMonth()];
+      const yr  = now.getFullYear();
+      document.getElementById('date-text').textContent = `${wd}, ${dd} de ${mon} de ${yr}`;
+    }
+    tick();
+    setInterval(tick, 1000);
+
+    /* ── Stars ── */
+    const starsEl = document.getElementById('stars');
+    for (let i = 0; i < 160; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const size = Math.random() * 2.5 + .5;
+      s.style.cssText = `
+        width:${size}px; height:${size}px;
+        top:${Math.random()*100}%;
+        left:${Math.random()*100}%;
+        --d:${(Math.random()*4+2).toFixed(1)}s;
+        --o:${(Math.random()*.7+.2).toFixed(2)};
+        animation-delay:${(Math.random()*5).toFixed(1)}s;
+      `;
+      starsEl.appendChild(s);
+    }
+
+    /* ── Floating code snippets ── */
+    const snippets = [
+      'const night = () => {};', 'while(coffee) { code(); }',
+      'git commit -m "feat: dark mode"', '// TODO: sleep()',
+      'def read_book(): return wisdom', 'SELECT * FROM dreams;',
+      'npm run infinity', '<hero>nerd</hero>',
+      'if(tired) { coffee++ }', 'sudo apt-get wisdom',
+      '🎮 Player 1 has entered', '📖 Chapter += 1;',
+      'console.log("boa noite 🌙")', 'return 42; // always',
+      'catch(Exception e) { nap(); }', 'import { sleep } from "life"',
+    ];
+    const floatContainer = document.getElementById('codeFloats');
+    snippets.forEach((text, i) => {
+      const el = document.createElement('div');
+      el.className = 'code-float';
+      el.textContent = text;
+      const dur = (18 + Math.random() * 20).toFixed(1);
+      el.style.cssText = `
+        left:${Math.random()*90}%;
+        animation-duration:${dur}s;
+        animation-delay:${(Math.random()*-dur)}s;
+        color:hsl(${Math.random()*360},70%,70%);
+      `;
+      floatContainer.appendChild(el);
+    });
+  </script>
+</body>
+</html>
