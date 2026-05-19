@@ -2382,7 +2382,17 @@
                 }
 
                 const finalCount = Number(count) || 0;
-                document.getElementById('card-emails').textContent = finalCount;
+                console.log("Atualizando UI emails - Valor finalCount preparado:", finalCount);
+
+                const cardEl = document.getElementById('card-emails');
+                if (!cardEl) {
+                    console.error("ERRO CRÍTICO: Elemento 'card-emails' retornou NULL no momento da atualização!");
+                } else {
+                    console.log("Elemento 'card-emails' encontrado. Atualizando textContent...");
+                    cardEl.textContent = finalCount;
+                    console.log("textContent atualizado com sucesso para:", cardEl.textContent);
+                }
+
                 sysLog.textContent = `Gmail OK: ${finalCount} emails não lidos`;
                 sysLog.style.color = "var(--neon-green)";
             } catch (e) {
