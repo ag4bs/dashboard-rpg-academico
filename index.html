@@ -1391,12 +1391,14 @@
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
                 <div style="display: flex; flex-direction: column; gap: 5px;">
-                    <label style="color: var(--neon-blue); font-size: 0.75rem; font-weight: bold;">PORTAL 1 (LINK)</label>
+                    <label style="color: var(--neon-blue); font-size: 0.75rem; font-weight: bold;">PORTAL 1
+                        (LINK)</label>
                     <input type="text" id="portal-fatecie-input" placeholder="URL do Portal 1..."
                         class="reading-form-input">
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 5px;">
-                    <label style="color: var(--neon-blue); font-size: 0.75rem; font-weight: bold;">PORTAL 2 (LINK)</label>
+                    <label style="color: var(--neon-blue); font-size: 0.75rem; font-weight: bold;">PORTAL 2
+                        (LINK)</label>
                     <input type="text" id="portal-thinkific-input" placeholder="URL do Portal 2..."
                         class="reading-form-input">
                 </div>
@@ -2298,24 +2300,6 @@
         }
 
         function initReadings() {
-            if (readings.length === 0) {
-                // Adiciona uma leitura inicial de exemplo
-                const example = {
-                    id: 'init-1',
-                    title: "Meu Nerd Inocente",
-                    author: "Natália Tilcailo",
-                    currentPage: 1,
-                    totalPages: 250,
-                    type: 'Livro',
-                    category: 'Pessoal',
-                    status: 'Em andamento',
-                    completed: false
-                };
-                readings.push(example);
-                currentReadingId = example.id;
-                localStorage.setItem('reading_list', JSON.stringify(readings));
-                localStorage.setItem('current_reading_id', currentReadingId);
-            }
             renderLibrary();
             renderCurrentReading();
         }
