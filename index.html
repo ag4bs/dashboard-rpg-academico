@@ -2300,6 +2300,14 @@
         }
 
         function initReadings() {
+            // Remove o exemplo inicial 'init-1' / 'Meu Nerd Inocente' se ainda estiver no localStorage antigo do usuário
+            readings = readings.filter(r => r.id !== 'init-1' && r.title !== "Meu Nerd Inocente");
+            if (currentReadingId === 'init-1') {
+                currentReadingId = null;
+                localStorage.removeItem('current_reading_id');
+            }
+            localStorage.setItem('reading_list', JSON.stringify(readings));
+
             renderLibrary();
             renderCurrentReading();
         }
