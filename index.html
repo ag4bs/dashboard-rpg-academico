@@ -1997,6 +1997,7 @@
                         const user = result.user;
 
                         console.log("Login Firebase Auth realizado com sucesso!");
+                        console.log("Token recebido do GoogleAuthProvider:", token ? token.substring(0, 15) + "..." : "NULO");
 
                         // Guardado APENAS em memória por motivos de segurança!
                         accessToken = token;
@@ -2321,19 +2322,34 @@
 
         // --- API Data Fetching ---
         async function fetchWithToken(url) {
-            if (!accessToken) return null;
+            if (!accessToken) {
+                console.warn(`[fetchWithToken] Requisição bloqueada: accessToken é NULO para ${url}`);
+                return null;
+            }
+
+            console.log(`[fetchWithToken] Iniciando requisição para: ${url}`);
+            console.log(`[fetchWithToken] Usando accessToken: Bearer ${accessToken.substring(0, 15)}...`);
+
             const response = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
             });
+
+            console.log(`[fetchWithToken] Status HTTP para ${url}: ${response.status}`);
+
             if (!response.ok) {
                 if (response.status === 401) {
                     console.error("Token expirado ou inválido.");
                     accessToken = null;
                     localStorage.removeItem('google_access_token');
                 }
+                const errorText = await response.text();
+                console.error(`[fetchWithToken] Resposta de erro detalhada:`, errorText);
                 throw new Error(`API Error: ${response.status} ${response.statusText} for ${url}`);
             }
-            return await response.json();
+
+            const payload = await response.json();
+            console.log(`[fetchWithToken] Payload retornado:`, payload);
+            return payload;
         }
 
         async function fetchDashboardData() {
@@ -2351,15 +2367,23 @@
             // 1. Gmail
             try {
                 sysLog.textContent = "Sincronizando Gmail...";
-                const query = encodeURIComponent('is:unread in:inbox');
-                const mailData = await fetchWithToken(`https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${query}&maxResults=1`);
+                const query = encodeURIComponent('is:unread');
+                const mailData = await fetchWithToken(`https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${query}`);
 
                 let count = 0;
                 if (mailData && mailData.resultSizeEstimate !== undefined) {
                     count = mailData.resultSizeEstimate;
+                    console.log(`Contagem de emails via resultSizeEstimate: ${count}`);
+                } else if (mailData && mailData.messages) {
+                    count = mailData.messages.length;
+                    console.log(`Contagem de emails via array messages: ${count}`);
+                } else {
+                    console.log(`Nenhuma mensagem não lida encontrada ou payload não esperado.`);
                 }
-                animateValueElement(document.getElementById('card-emails'), count);
-                sysLog.textContent = `Gmail OK: ${count} emails não lidos`;
+
+                const finalCount = Number(count) || 0;
+                document.getElementById('card-emails').textContent = finalCount;
+                sysLog.textContent = `Gmail OK: ${finalCount} emails não lidos`;
                 sysLog.style.color = "var(--neon-green)";
             } catch (e) {
                 console.error("Erro Gmail:", e);
