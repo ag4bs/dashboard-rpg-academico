@@ -3248,8 +3248,8 @@
         e não há race condition com window.FirebaseSdk.
     -->
     <script type="module">
-        // Firebase 12.13.0 — CDN via URLs absolutas (sem importmap, compatível com GitHub Pages)
-        const BASE = 'https://www.gstatic.com/firebasejs/12.13.0';
+        // Firebase 10.8.0 — CDN via URLs absolutas
+        const BASE = 'https://www.gstatic.com/firebasejs/10.8.0';
 
         const { initializeApp } = await import(`${BASE}/firebase-app.js`);
         const { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged }
