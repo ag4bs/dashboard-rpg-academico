@@ -1261,10 +1261,10 @@
                     <div style="text-align: left;">
                         <div
                             style="font-family: 'Silkscreen', cursive; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 2px;">
-                            Portal da Faculdade</div>
+                            Portal 1</div>
                         <div
                             style="font-size: 0.7rem; color: var(--text-secondary); font-family: 'Fira Code', monospace;">
-                            Acessar Fatecie / disciplinas</div>
+                            Acessar link customizado 1</div>
                     </div>
                 </div>
                 <!-- Curso -->
@@ -1274,10 +1274,10 @@
                     <div style="text-align: left;">
                         <div
                             style="font-family: 'Silkscreen', cursive; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 2px;">
-                            Portal do Curso</div>
+                            Portal 2</div>
                         <div
                             style="font-size: 0.7rem; color: var(--text-secondary); font-family: 'Fira Code', monospace;">
-                            Acessar PrograMaria / Thinkific</div>
+                            Acessar link customizado 2</div>
                     </div>
                 </div>
             </div>
@@ -1391,14 +1391,14 @@
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
                 <div style="display: flex; flex-direction: column; gap: 5px;">
-                    <label style="font-size: 0.65rem; color: #888; text-transform: uppercase;">Link Faculdade:</label>
-                    <input type="text" id="portal-fatecie-input" placeholder="URL da Faculdade..."
-                        style="background: #000; border: 1px solid #444; color: #fff; padding: 8px 12px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.8rem; outline: none;">
+                    <label style="color: var(--neon-blue); font-size: 0.75rem; font-weight: bold;">PORTAL 1 (LINK)</label>
+                    <input type="text" id="portal-fatecie-input" placeholder="URL do Portal 1..."
+                        class="reading-form-input">
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 5px;">
-                    <label style="font-size: 0.65rem; color: #888; text-transform: uppercase;">Link Curso:</label>
-                    <input type="text" id="portal-thinkific-input" placeholder="URL do Curso..."
-                        style="background: #000; border: 1px solid #444; color: #fff; padding: 8px 12px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.8rem; outline: none;">
+                    <label style="color: var(--neon-blue); font-size: 0.75rem; font-weight: bold;">PORTAL 2 (LINK)</label>
+                    <input type="text" id="portal-thinkific-input" placeholder="URL do Portal 2..."
+                        class="reading-form-input">
                 </div>
             </div>
 
@@ -2076,7 +2076,7 @@
         }
 
         function initRaidLink() {
-            const defaultLink = 'https://www.youtube.com/live/m1VRpXnPRKw?si=wTi3OJisnXTdDN2d';
+            const defaultLink = '';
             if (!localStorage.getItem('raid_live_link')) {
                 localStorage.setItem('raid_live_link', defaultLink);
             }
@@ -2109,10 +2109,10 @@
         }
 
         function resetPortalLinks() {
-            if (confirm("Deseja restaurar os links originais dos portais?")) {
+            if (confirm("Deseja limpar os links dos portais?")) {
                 const defaults = {
-                    fatecie: 'https://portaldoaluno.fatecie.edu.br/login',
-                    thinkific: 'https://euprogramo.thinkific.com/enrollments'
+                    fatecie: '',
+                    thinkific: ''
                 };
 
                 localStorage.setItem('portal_fatecie_link', defaults.fatecie);
@@ -2128,8 +2128,8 @@
 
         function initPortals() {
             const defaults = {
-                fatecie: 'https://portaldoaluno.fatecie.edu.br/login',
-                thinkific: 'https://euprogramo.thinkific.com/enrollments'
+                fatecie: '',
+                thinkific: ''
             };
 
             if (!localStorage.getItem('portal_fatecie_link')) localStorage.setItem('portal_fatecie_link', defaults.fatecie);
@@ -2412,102 +2412,7 @@
         let expandedMissions = new Set();
         let missionIdToDelete = null;
 
-        const defaultMissions = [
-            {
-                id: 'm-amanha-1',
-                title: 'Assistir à gravação da live do curso: PrograMaria Sprint IA no trabalho',
-                category: 'lives',
-                deadline: '2026-05-18',
-                priority: 'alta',
-                status: 'Pendente',
-                tags: ['IA', 'Sprint'],
-                completed: false,
-                link: 'https://www.youtube.com/live/m1VRpXnPRKw?si=wTi3OJisnXTdDN2d',
-                description: 'Assunto essencial para o sprint acadêmico.',
-                subtasks: []
-            },
-            {
-                id: 'm-amanha-2',
-                title: 'Fazer Módulo 5: Integração e Produtos com IA',
-                category: 'python',
-                deadline: '2026-05-18',
-                priority: 'alta',
-                status: 'Pendente',
-                tags: ['Módulo 5', 'IA'],
-                completed: false,
-                link: '',
-                description: 'Praticar integrações via API no repositório.',
-                subtasks: []
-            },
-            {
-                id: 'm-2405-1',
-                title: 'Desenvolvimento Humano — Unidade 1',
-                category: 'faculdade',
-                deadline: '2026-05-24',
-                priority: 'alta',
-                status: 'Pendente',
-                tags: ['EAD', 'Unidade 1'],
-                completed: false,
-                link: 'https://www.eadunifatecie.com.br/pluginfile.php?file=%2F19485322%2Fmod_resource%2Fcontent%2F1%2FDESENVOLVIMENTO%20HUMANO.pdf',
-                description: 'Ler o PDF principal da primeira unidade.',
-                subtasks: [
-                    { id: 'sub-1-1', title: 'Ler conteúdo/PDF da Unidade 1', completed: false, xp: 10, category: 'leituras' },
-                    { id: 'sub-1-2', title: 'Assistir videoaula 1 da Unidade 1', completed: false, xp: 15, category: 'faculdade' },
-                    { id: 'sub-1-3', title: 'Assistir videoaula 2 da Unidade 1', completed: false, xp: 15, category: 'faculdade' }
-                ]
-            },
-            {
-                id: 'm-2405-2',
-                title: 'Desenvolvimento Humano — Unidade 2',
-                category: 'faculdade',
-                deadline: '2026-05-24',
-                priority: 'alta',
-                status: 'Pendente',
-                tags: ['EAD', 'Unidade 2'],
-                completed: false,
-                link: 'https://www.eadunifatecie.com.br/pluginfile.php?file=%2F19485322%2Fmod_resource%2Fcontent%2F1%2FDESENVOLVIMENTO%20HUMANO.pdf',
-                description: 'Unidade com foco no desenvolvimento psicossocial.',
-                subtasks: [
-                    { id: 'sub-2-1', title: 'Ler conteúdo/PDF da Unidade 2', completed: false, xp: 10, category: 'leituras' },
-                    { id: 'sub-2-2', title: 'Assistir videoaula 1 da Unidade 2', completed: false, xp: 15, category: 'faculdade' },
-                    { id: 'sub-2-3', title: 'Assistir videoaula 2 da Unidade 2', completed: false, xp: 15, category: 'faculdade' }
-                ]
-            },
-            {
-                id: 'm-2405-3',
-                title: 'Economia — Unidade 1',
-                category: 'faculdade',
-                deadline: '2026-05-24',
-                priority: 'alta',
-                status: 'Pendente',
-                tags: ['EAD', 'Unidade 1'],
-                completed: false,
-                link: 'https://www.eadunifatecie.com.br/pluginfile.php?file=%2F18776800%2Fmod_resource%2Fcontent%2F1%2FEconomia%20-%20Unifatecie.pdf',
-                description: 'Introdução aos conceitos de microeconomia e macroeconomia.',
-                subtasks: [
-                    { id: 'sub-3-1', title: 'Ler conteúdo/PDF da Unidade 1', completed: false, xp: 10, category: 'leituras' },
-                    { id: 'sub-3-2', title: 'Assistir videoaula 1 da Unidade 1', completed: false, xp: 15, category: 'faculdade' },
-                    { id: 'sub-3-3', title: 'Assistir videoaula 2 da Unidade 1', completed: false, xp: 15, category: 'faculdade' }
-                ]
-            },
-            {
-                id: 'm-2405-4',
-                title: 'Economia — Unidade 2',
-                category: 'faculdade',
-                deadline: '2026-05-24',
-                priority: 'alta',
-                status: 'Pendente',
-                tags: ['EAD', 'Unidade 2'],
-                completed: false,
-                link: 'https://www.eadunifatecie.com.br/pluginfile.php?file=%2F18776800%2Fmod_resource%2Fcontent%2F1%2FEconomia%20-%20Unifatecie.pdf',
-                description: 'Conceitos de elasticidade de preço e mercado.',
-                subtasks: [
-                    { id: 'sub-4-1', title: 'Ler conteúdo/PDF da Unidade 2', completed: false, xp: 10, category: 'leituras' },
-                    { id: 'sub-4-2', title: 'Assistir videoaula 1 da Unidade 2', completed: false, xp: 15, category: 'faculdade' },
-                    { id: 'sub-4-3', title: 'Assistir videoaula 2 da Unidade 2', completed: false, xp: 15, category: 'faculdade' }
-                ]
-            }
-        ];
+        const defaultMissions = [];
 
         let missions = JSON.parse(localStorage.getItem('missions_list') || 'null');
 
